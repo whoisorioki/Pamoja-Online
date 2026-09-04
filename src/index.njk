@@ -1,0 +1,11 @@
+---
+layout: base.njk
+title: Nguvu Pamoja — Home
+---
+<h1>Nguvu Pamoja</h1>
+<p>Together in strength</p>
+<ul>
+{% for session in sessions %}
+  <li><a href="/week/{{ session.week }}/">Week {{ session.week }}: {{ session.theme }}</a></li>
+{% endfor %}
+</ul>

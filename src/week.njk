@@ -1,0 +1,13 @@
+---
+layout: base.njk
+pagination:
+  data: sessions
+  size: 1
+  alias: session
+permalink: "/week/{{ session.week }}/"
+title: "Week {{ session.week }}: {{ session.theme }}"
+---
+<h1>Week {{ session.week }}: {{ session.theme }}</h1>
+<p>{{ session.scripture }} — {{ session.insight }}</p>
+<p>{{ session.reflection }}</p>
+<p><a href="/">Back home</a></p>
