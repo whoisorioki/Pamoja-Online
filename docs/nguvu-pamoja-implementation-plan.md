@@ -339,7 +339,10 @@ Cloudflare runs `npm run build`, which executes `npx @11ty/eleventy`, producing 
 - Curriculum changes: edit the one data file, redeploy
 - Periodic review of who holds Supabase admin access and who holds each forum space's passphrase
 - Periodic manual review of flagged forum posts until/unless Phase 2's moderation dashboard exists
-- Confirm the keep-alive cron is still running
+- Confirm the keep-alive cron is still running (if set up)
+- Monitor Cloudflare WAF logs for rate limiting triggers (brute-force attempts on API endpoints)
+- Review Supabase CORS origins when adding/removing domains
+- Rotate forum space passphrases at the start of each 8-week cycle — see [`production-operational-playbook.md`](production-operational-playbook.md) Section 3
 
 ---
 
@@ -350,7 +353,7 @@ Cloudflare runs `npm run build`, which executes `npx @11ty/eleventy`, producing 
 - [ ] Decide forum moderation posture long-term: report/flag (current) vs. a pre-moderation queue
 - [ ] Confirm the public-forum rejection with the Fountwood facilitator team
 - [ ] Confirm who the 1–2 trusted Supabase admins will be, and who distributes/rotates forum passphrases
-- [ ] Set up static hosting (Cloudflare Pages or similar) and inject build env vars
+- [ ] Set up static hosting on Cloudflare Pages and inject build env vars — steps defined in Section 12 and [`production-operational-playbook.md`](production-operational-playbook.md)
 - [ ] Decide whether to set up a keep-alive cron for the Supabase free tier
 - [x] **Decided (Sprint 0):** Week detail screen reflection persistence uses `journal_entries` (`token` + `week` + `entry`), matching the SOT §8 schema without requiring new tables.
 - [x] **Completed (Sprint 0):** Schema + RLS migration deployed to live Supabase (`ehhxoanfbisdzkumsmwf`). Tables: `check_ins`, `journal_entries`, `forum_posts`, `forum_passphrases`. RLS policies verified via live integration tests.
