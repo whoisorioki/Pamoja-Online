@@ -21,7 +21,10 @@
       <a href="/" class="site-logo">
         🌿 Nguvu Pamoja
       </a>
-      <nav class="site-nav">
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span class="nav-toggle-icon">☰</span>
+      </button>
+      <nav class="site-nav" id="site-nav">
         <a href="/" class="nav-link">Home</a>
         <a href="/check-in/1/" class="nav-link">Check-in</a>
         <a href="/journal/" class="nav-link">Journal</a>
@@ -42,5 +45,26 @@
       </p>
     </footer>
   </div>
+
+  <script>
+    (function() {
+      var toggle = document.querySelector('.nav-toggle');
+      var nav = document.getElementById('site-nav');
+      if (toggle && nav) {
+        toggle.addEventListener('click', function() {
+          var expanded = toggle.getAttribute('aria-expanded') === 'true';
+          toggle.setAttribute('aria-expanded', !expanded);
+          nav.classList.toggle('open');
+        });
+        // Close menu when a link is clicked
+        nav.querySelectorAll('.nav-link').forEach(function(link) {
+          link.addEventListener('click', function() {
+            nav.classList.remove('open');
+            toggle.setAttribute('aria-expanded', 'false');
+          });
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

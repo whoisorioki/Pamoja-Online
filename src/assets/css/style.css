@@ -331,6 +331,63 @@ footer.site-footer {
   color: var(--accent-primary);
 }
 
+/* Navigation Toggle Button (hidden on desktop) */
+.nav-toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.4rem 0.6rem;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background 0.2s ease;
+}
+
+.nav-toggle:hover {
+  background: var(--bg-card-subtle);
+}
+
+/* Mobile navigation (< 768px) */
+@media (max-width: 767px) {
+  .nav-toggle {
+    display: block;
+  }
+
+  .site-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem;
+    flex-direction: column;
+    gap: 0.25rem;
+    box-shadow: var(--shadow-md);
+    z-index: 100;
+  }
+
+  .site-nav.open {
+    display: flex;
+  }
+
+  .nav-link {
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+  }
+
+  .nav-link:hover, .nav-link.active {
+    background: var(--bg-card-subtle);
+  }
+
+  /* Position header relatively so nav dropdown anchors to it */
+  header.site-header {
+    position: relative;
+  }
+}
+
 /* Responsive Breakpoints — Mobile-first, scaling up to desktop */
 
 /* Tablets and large phones (640px+) */
