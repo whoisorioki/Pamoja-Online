@@ -88,16 +88,16 @@ title: Nguvu Pamoja — Home
   <h2 class="card-title">📅 8-Week Curriculum</h2>
   <p class="card-subtitle">Select a session to view scripture, insights, and video gathering details.</p>
 
-  <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-    {% for session in sessions %}
-      <a href="/week/{{ session.week }}/" style="text-decoration: none; color: inherit;">
-        <div style="background: var(--bg-card-subtle); padding: 1rem; border-radius: var(--border-radius); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease;" class="session-item">
+  <div class="session-list" id="session-list">
+    {% for session in sessions.json %}
+      <a href="/week/{{ session.week }}/" class="session-item-link">
+        <div class="session-item">
           <div>
-            <span style="font-size: 0.75rem; font-weight: 700; color: var(--accent-primary); text-transform: uppercase;">Week {{ session.week }}</span>
-            <h3 style="font-family: var(--font-heading); font-size: 1.05rem; font-weight: 600; color: var(--text-primary);">{{ session.theme }}</h3>
-            <p style="font-size: 0.85rem; color: var(--text-secondary);">{{ session.scripture }}</p>
+            <span class="session-week">Week {{ session.week }}</span>
+            <h3 class="session-theme">{{ session.theme }}</h3>
+            <p class="session-scripture">{{ session.scripture }}</p>
           </div>
-          <span style="font-size: 1.2rem; color: var(--accent-primary);">→</span>
+          <span class="session-arrow">→</span>
         </div>
       </a>
     {% endfor %}

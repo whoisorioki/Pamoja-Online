@@ -278,6 +278,157 @@ footer.site-footer {
   border-top: 1px solid var(--border-color);
 }
 
+/* Session List */
+.session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.session-item-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.session-item {
+  background: var(--bg-card-subtle);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.session-item:hover {
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.session-week {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+}
+
+.session-theme {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.session-scripture {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.session-arrow {
+  font-size: 1.2rem;
+  color: var(--accent-primary);
+}
+
+/* Responsive Breakpoints — Mobile-first, scaling up to desktop */
+
+/* Tablets and large phones (640px+) */
+@media (min-width: 640px) {
+  .site-container {
+    max-width: 720px;
+    padding: 2rem 1.5rem;
+  }
+
+  .site-logo {
+    font-size: 1.5rem;
+  }
+
+  .nav-link {
+    font-size: 0.95rem;
+    padding: 0.4rem 0.9rem;
+  }
+
+  .card {
+    padding: 1.75rem;
+  }
+
+  .card-title {
+    font-size: 1.35rem;
+  }
+
+  .jitsi-container {
+    height: 480px;
+  }
+}
+
+/* Small laptops and tablets landscape (768px+) */
+@media (min-width: 768px) {
+  .site-container {
+    max-width: 860px;
+    padding: 2.5rem 2rem;
+  }
+
+  header.site-header {
+    padding-bottom: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .site-nav {
+    gap: 1rem;
+  }
+
+  .card {
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .jitsi-container {
+    height: 540px;
+  }
+
+  .session-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
+/* Desktops (1024px+) */
+@media (min-width: 1024px) {
+  .site-container {
+    max-width: 960px;
+    padding: 3rem 2rem;
+  }
+
+  .site-logo {
+    font-size: 1.65rem;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+  }
+
+  .card-subtitle {
+    font-size: 1rem;
+  }
+
+  .jitsi-container {
+    height: 600px;
+  }
+
+  .session-list {
+    gap: 1.25rem;
+  }
+}
+
+/* Large desktops (1280px+) */
+@media (min-width: 1280px) {
+  .site-container {
+    max-width: 1120px;
+  }
+}
+
 footer.site-footer a {
   color: var(--accent-primary);
   text-decoration: none;
