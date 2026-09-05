@@ -1,0 +1,14 @@
+[
+  {
+    "key": "mens",
+    "title": "Men's Support Space",
+    "icon": "👨",
+    "description": "A private, passphrase-gated fellowship for men walking in recovery and spiritual renewal."
+  },
+  {
+    "key": "womens",
+    "title": "Women's Support Space",
+    "icon": "👩",
+    "description": "A private, passphrase-gated fellowship for women walking in recovery and spiritual renewal."
+  }
+]

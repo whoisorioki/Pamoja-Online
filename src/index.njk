@@ -2,10 +2,189 @@
 layout: base.njk
 title: Nguvu Pamoja — Home
 ---
-<h1>Nguvu Pamoja</h1>
-<p>Together in strength</p>
-<ul>
-{% for session in sessions %}
-  <li><a href="/week/{{ session.week }}/">Week {{ session.week }}: {{ session.theme }}</a></li>
-{% endfor %}
-</ul>
+<div class="card" style="background: linear-gradient(135deg, #faf3e8 0%, #ffffff 100%);">
+  <span class="badge">Fountwood Community Support</span>
+  <h1 style="font-family: var(--font-heading); font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--accent-primary);">
+    Together in Strength
+  </h1>
+  <p style="color: var(--text-secondary); margin-bottom: 1.25rem;">
+    A confidential online companion for participants walking through recovery, healing, and spiritual renewal.
+  </p>
+  <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+    <a href="/week/1/" class="btn btn-primary">Join Week 1 Session</a>
+    <a href="/resources/" class="btn btn-secondary">Crisis & Support Contacts</a>
+  </div>
+</div>
+
+<!-- Token Setup & Pseudonym Identity -->
+<div class="card" id="token-setup">
+  <h2 class="card-title">🔑 Anonymous Credential</h2>
+  <p class="card-subtitle">
+    No real names or passwords. Your token is a random 3-word phrase stored privately in your browser.
+  </p>
+
+  <div id="token-active-view" style="display: none;">
+    <div style="background: var(--bg-card-subtle); padding: 1rem; border-radius: var(--border-radius); border: 1px solid var(--border-color); margin-bottom: 1rem;">
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">Active Pseudonym Token:</p>
+      <p style="font-size: 1.2rem; font-weight: 700; color: var(--accent-primary);" id="active-token-text"></p>
+    </div>
+    <button class="btn btn-secondary" onclick="resetTokenFlow()">Use Different Token</button>
+  </div>
+
+  <div id="token-initial-view">
+    <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;">
+      <button class="btn btn-primary" onclick="generateNewTokenFlow()">
+        ✨ Generate 3-Word Token
+      </button>
+      <button class="btn btn-secondary" onclick="togglePasteTokenForm()">
+        Paste Saved Token
+      </button>
+    </div>
+
+    <!-- Generate Warning Banner -->
+    <div id="token-generated-box" style="display: none; background: #fff8ee; border: 1px solid #f2d2a9; padding: 1rem; border-radius: var(--border-radius); margin-bottom: 1rem;">
+      <p style="font-weight: 700; color: #8a4b16; margin-bottom: 0.25rem;">⚠️ Important: Save Your Token</p>
+      <p style="font-size: 0.9rem; color: #6e411b; margin-bottom: 0.75rem;">
+        Your token cannot be recovered if lost. Copy and keep it in a safe place.
+      </p>
+      <div style="font-family: monospace; font-size: 1.25rem; font-weight: 700; background: #ffffff; padding: 0.75rem; border-radius: 8px; text-align: center; border: 1px solid #e0c29e; color: var(--accent-primary);" id="new-token-display">
+      </div>
+      <button class="btn btn-primary" style="margin-top: 0.75rem; width: 100%;" onclick="confirmNewToken()">
+        I Have Saved My Token — Continue
+      </button>
+    </div>
+
+    <!-- Paste Existing Form -->
+    <div id="token-paste-box" style="display: none; margin-bottom: 1rem;">
+      <div class="form-group">
+        <label class="form-label" for="paste-token-input">Paste Your 3-Word Token</label>
+        <input type="text" id="paste-token-input" class="form-control" placeholder="e.g. hope-peace-grace">
+      </div>
+      <button class="btn btn-primary" onclick="savePastedToken()">Save Token</button>
+    </div>
+  </div>
+</div>
+
+<!-- Forum Space Selection -->
+<div class="card">
+  <h2 class="card-title">💬 Gender-Separated Forum Space</h2>
+  <p class="card-subtitle">
+    Choose your space. Your choice is remembered privately on your device.
+  </p>
+
+  <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+    <button class="btn btn-secondary" id="space-mens-btn" onclick="selectSpace('mens')">
+      👨 Men's Space
+    </button>
+    <button class="btn btn-secondary" id="space-womens-btn" onclick="selectSpace('womens')">
+      👩 Women's Space
+    </button>
+  </div>
+  <p id="space-status-text" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem;"></p>
+</div>
+
+<!-- 8-Week Curriculum Schedule -->
+<div class="card">
+  <h2 class="card-title">📅 8-Week Curriculum</h2>
+  <p class="card-subtitle">Select a session to view scripture, insights, and video gathering details.</p>
+
+  <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+    {% for session in sessions %}
+      <a href="/week/{{ session.week }}/" style="text-decoration: none; color: inherit;">
+        <div style="background: var(--bg-card-subtle); padding: 1rem; border-radius: var(--border-radius); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease;" class="session-item">
+          <div>
+            <span style="font-size: 0.75rem; font-weight: 700; color: var(--accent-primary); text-transform: uppercase;">Week {{ session.week }}</span>
+            <h3 style="font-family: var(--font-heading); font-size: 1.05rem; font-weight: 600; color: var(--text-primary);">{{ session.theme }}</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">{{ session.scripture }}</p>
+          </div>
+          <span style="font-size: 1.2rem; color: var(--accent-primary);">→</span>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+let tempGeneratedToken = '';
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderTokenState();
+  renderSpaceState();
+});
+
+function renderTokenState() {
+  const token = getStoredToken();
+  const activeView = document.getElementById('token-active-view');
+  const initialView = document.getElementById('token-initial-view');
+  const activeText = document.getElementById('active-token-text');
+
+  if (token) {
+    activeView.style.display = 'block';
+    initialView.style.display = 'none';
+    activeText.innerText = token;
+  } else {
+    activeView.style.display = 'none';
+    initialView.style.display = 'block';
+  }
+}
+
+function generateNewTokenFlow() {
+  tempGeneratedToken = generateThreeWordToken();
+  document.getElementById('new-token-display').innerText = tempGeneratedToken;
+  document.getElementById('token-generated-box').style.display = 'block';
+  document.getElementById('token-paste-box').style.display = 'none';
+}
+
+function confirmNewToken() {
+  if (tempGeneratedToken) {
+    setStoredToken(tempGeneratedToken);
+    renderTokenState();
+  }
+}
+
+function togglePasteTokenForm() {
+  const pasteBox = document.getElementById('token-paste-box');
+  const genBox = document.getElementById('token-generated-box');
+  genBox.style.display = 'none';
+  pasteBox.style.display = pasteBox.style.display === 'none' ? 'block' : 'none';
+}
+
+function savePastedToken() {
+  const input = document.getElementById('paste-token-input').value;
+  if (input && input.trim()) {
+    setStoredToken(input);
+    renderTokenState();
+  }
+}
+
+function resetTokenFlow() {
+  clearStoredToken();
+  renderTokenState();
+}
+
+function renderSpaceState() {
+  const space = getStoredSpace();
+  const statusText = document.getElementById('space-status-text');
+  const mensBtn = document.getElementById('space-mens-btn');
+  const womensBtn = document.getElementById('space-womens-btn');
+
+  mensBtn.classList.remove('btn-primary');
+  womensBtn.classList.remove('btn-primary');
+
+  if (space === 'mens') {
+    mensBtn.classList.add('btn-primary');
+    statusText.innerText = 'Active Space: Men\'s Forum Space';
+  } else if (space === 'womens') {
+    womensBtn.classList.add('btn-primary');
+    statusText.innerText = 'Active Space: Women\'s Forum Space';
+  } else {
+    statusText.innerText = 'No forum space selected yet.';
+  }
+}
+
+function selectSpace(space) {
+  setStoredSpace(space);
+  renderSpaceState();
+  window.location.href = `/forum/${space}/`;
+}
+</script>

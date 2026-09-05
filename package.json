@@ -1,15 +1,31 @@
 {
   "name": "pamoja-online",
   "version": "1.0.0",
-  "description": "",
+  "description": "Nguvu Pamoja Online Platform — A faith-based support group companion",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "eleventy --serve",
+    "build": "eleventy",
+    "test": "vitest run && npx @11ty/eleventy && node tests/build/verify-build.js && playwright test",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:reset": "supabase db reset",
+    "supabase:link": "supabase link",
+    "supabase:db:push": "supabase db push"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@11ty/eleventy": "^3.1.6"
+    "@11ty/eleventy": "^3.1.6",
+    "@playwright/test": "^1.63.0",
+    "serve": "^14.2.6",
+    "supabase": "^2.116.0",
+    "vitest": "^5.0.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.115.0",
+    "dotenv": "^17.4.2"
   }
 }

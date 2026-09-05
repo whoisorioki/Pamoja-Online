@@ -1,0 +1,316 @@
+---
+layout: base.njk
+title: Reflection & Journal Space — Nguvu Pamoja
+permalink: "/journal/"
+---
+<div class="card" style="background: linear-gradient(135deg, #faf3e8 0%, #ffffff 100%);">
+  <span class="badge">Private Reflection Space</span>
+  <h1 style="font-family: var(--font-heading); font-size: 1.75rem; margin-bottom: 0.5rem; color: var(--accent-primary);">
+    Personal Reflection Journal
+  </h1>
+  <p style="color: var(--text-secondary);">
+    Your private journal entries are private and protected by your anonymous token. Nobody else can read these entries.
+  </p>
+</div>
+
+<!-- Token Gate Warning -->
+<div id="journal-token-gate" class="card" style="display: none; background: #fff8ee; border-color: #f2d2a9;">
+  <h2 class="card-title" style="color: #8a4b16;">🔑 Anonymous Token Required</h2>
+  <p class="card-subtitle" style="color: #6e411b;">
+    Please set or paste your 3-word token to view and write private journal entries.
+  </p>
+  <a href="/#token-setup" class="btn btn-primary">Set Up Anonymous Token</a>
+</div>
+
+<!-- New Journal Entry Card -->
+<div id="journal-composer-card" class="card">
+  <h2 class="card-title">📝 Write New Reflection</h2>
+  <form id="journal-form" onsubmit="handleJournalSubmit(event)">
+    <div class="form-group">
+      <label for="journal-week-select" class="form-label">Curriculum Week</label>
+      <select id="journal-week-select" class="form-control" style="width: auto;">
+        <option value="1">Week 1: Admitting the Struggle</option>
+        <option value="2">Week 2: Hope and Healing</option>
+        <option value="3">Week 3: Accountability and Community</option>
+        <option value="4">Week 4: Dealing with Triggers</option>
+        <option value="5">Week 5: Forgiveness and Self-worth</option>
+        <option value="6">Week 6: Rebuilding Relationships</option>
+        <option value="7">Week 7: Living in Freedom</option>
+        <option value="8">Week 8: Perseverance</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="journal-entry-text" class="form-label">Your Private Reflection Note</label>
+      <textarea 
+        id="journal-entry-text" 
+        class="form-control" 
+        style="min-height: 120px;" 
+        placeholder="Write your thoughts, prayers, or answers to the weekly reflection questions..." 
+        required></textarea>
+    </div>
+
+    <button type="submit" id="journal-submit-btn" class="btn btn-primary">
+      Save Private Reflection
+    </button>
+  </form>
+</div>
+
+<!-- Past Journal Entries List -->
+<div id="journal-entries-section" class="card">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+    <h2 class="card-title" style="margin-bottom: 0;">📖 Past Journal Entries & Check-ins</h2>
+    <div style="display: flex; gap: 0.5rem;">
+      <a href="/check-in/1/" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+        📋 Weekly Check-in
+      </a>
+      <button onclick="loadJournalEntries()" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+        🔄 Refresh
+      </button>
+    </div>
+  </div>
+
+  <div id="journal-loading-spinner" style="text-align: center; color: var(--text-muted); padding: 1.5rem 0;">
+    Loading your private reflections...
+  </div>
+
+  <div id="journal-entries-list" style="display: flex; flex-direction: column; gap: 1rem;">
+  </div>
+</div>
+
+<!-- Edit Modal Overlay -->
+<div id="edit-journal-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center;">
+  <div class="card" style="width: 90%; max-width: 500px; background: #ffffff;">
+    <h3 class="card-title">Edit Journal Entry</h3>
+    <input type="hidden" id="edit-journal-id">
+    <div class="form-group">
+      <textarea id="edit-journal-text" class="form-control" style="min-height: 120px;"></textarea>
+    </div>
+    <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+      <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditedJournalEntry()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let journalEntriesStore = {};
+
+document.addEventListener('DOMContentLoaded', () => {
+  const token = getStoredToken();
+  const gateEl = document.getElementById('journal-token-gate');
+  const composerEl = document.getElementById('journal-composer-card');
+  const listSectionEl = document.getElementById('journal-entries-section');
+
+  if (!token) {
+    gateEl.style.display = 'block';
+    composerEl.style.display = 'none';
+    listSectionEl.style.display = 'none';
+  } else {
+    gateEl.style.display = 'none';
+    composerEl.style.display = 'block';
+    listSectionEl.style.display = 'block';
+    loadJournalEntries();
+  }
+});
+
+async function loadJournalEntries() {
+  const token = getStoredToken();
+  if (!token) return;
+
+  const client = getSupabaseClient(token);
+  const spinner = document.getElementById('journal-loading-spinner');
+  const listEl = document.getElementById('journal-entries-list');
+  spinner.style.display = 'block';
+  listEl.innerHTML = '';
+  journalEntriesStore = {};
+
+  if (!client) {
+    spinner.innerText = 'Unable to connect to database.';
+    return;
+  }
+
+  // Fetch journal entries
+  const { data: journalData, error: journalError } = await client
+    .from('journal_entries')
+    .select('*')
+    .eq('token', token)
+    .order('created_at', { ascending: false });
+
+  // Fetch check-ins for complete history view
+  const { data: checkinData, error: checkinError } = await client
+    .from('check_ins')
+    .select('*')
+    .eq('token', token)
+    .order('created_at', { ascending: false });
+
+  spinner.style.display = 'none';
+
+  if (journalError) {
+    console.error('Error fetching journal:', journalError);
+    listEl.innerHTML = `<p style="color: var(--text-secondary);">Error loading entries: ${escapeHtml(journalError.message)}</p>`;
+    return;
+  }
+
+  const entries = journalData || [];
+  const checkins = checkinData || [];
+
+  if (entries.length === 0 && checkins.length === 0) {
+    listEl.innerHTML = `
+      <div style="text-align: center; padding: 2rem; background: var(--bg-card-subtle); border-radius: var(--border-radius);">
+        <p style="color: var(--text-secondary); font-weight: 500;">No journal entries or check-ins yet.</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+          Your saved reflections and check-ins will appear here.
+        </p>
+      </div>
+    `;
+    return;
+  }
+
+  // Render Journal Entries
+  entries.forEach(entry => {
+    journalEntriesStore[entry.id] = entry.entry;
+    const card = document.createElement('div');
+    card.className = 'journal-entry-card';
+    card.style.cssText = 'background: var(--bg-card-subtle); padding: 1.1rem; border-radius: var(--border-radius); border: 1px solid var(--border-color); position: relative;';
+
+    const dateStr = new Date(entry.created_at).toLocaleDateString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+
+    card.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+        <span class="badge" style="margin-bottom: 0;">Week ${entry.week} Reflection</span>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">${dateStr}</span>
+      </div>
+      <p style="color: var(--text-primary); white-space: pre-wrap; font-size: 0.95rem; margin-bottom: 0.75rem;">${escapeHtml(entry.entry)}</p>
+      <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+        <button onclick="openEditModal('${entry.id}')" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+          ✏️ Edit
+        </button>
+        <button onclick="deleteJournalEntry('${entry.id}')" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; color: #b93829;">
+          🗑️ Delete
+        </button>
+      </div>
+    `;
+    listEl.appendChild(card);
+  });
+
+  // Render Check-ins if present
+  if (checkins.length > 0) {
+    const checkinHeader = document.createElement('h3');
+    checkinHeader.style.cssText = 'font-family: var(--font-heading); font-size: 1.1rem; margin-top: 1rem; color: var(--accent-primary);';
+    checkinHeader.innerText = 'Past Check-in Rituals';
+    listEl.appendChild(checkinHeader);
+
+    checkins.forEach(ci => {
+      const card = document.createElement('div');
+      card.style.cssText = 'background: #ffffff; padding: 1rem; border-radius: var(--border-radius); border: 1px solid var(--border-color);';
+      const dateStr = new Date(ci.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+      card.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+          <span style="font-weight: 700; font-size: 0.85rem; color: var(--accent-primary);">Week ${ci.week} Check-in</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">${dateStr}</span>
+        </div>
+        <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.25rem;">
+          <strong>Challenge:</strong> ${escapeHtml(ci.challenge || 'None listed')}
+        </p>
+        <p style="font-size: 0.9rem; color: var(--text-primary);">
+          <strong>Victory:</strong> ${escapeHtml(ci.victory || 'None listed')}
+        </p>
+      `;
+      listEl.appendChild(card);
+    });
+  }
+}
+
+async function handleJournalSubmit(e) {
+  e.preventDefault();
+  const token = getStoredToken();
+  if (!token) return;
+
+  const week = parseInt(document.getElementById('journal-week-select').value, 10);
+  const entryText = document.getElementById('journal-entry-text').value.trim();
+  const submitBtn = document.getElementById('journal-submit-btn');
+
+  if (!entryText) return;
+
+  submitBtn.disabled = true;
+  submitBtn.innerText = 'Saving reflection...';
+
+  const client = getSupabaseClient(token);
+  const { data, error } = await client
+    .from('journal_entries')
+    .insert([{ token: token, week: week, entry: entryText }]);
+
+  if (error) {
+    alert('Error saving entry: ' + escapeHtml(error.message));
+  } else {
+    document.getElementById('journal-entry-text').value = '';
+    loadJournalEntries();
+  }
+
+  submitBtn.disabled = false;
+  submitBtn.innerText = 'Save Private Reflection';
+}
+
+function openEditModal(id) {
+  const text = journalEntriesStore[id] || '';
+  document.getElementById('edit-journal-id').value = id;
+  document.getElementById('edit-journal-text').value = text;
+  document.getElementById('edit-journal-modal').style.display = 'flex';
+}
+
+function closeEditModal() {
+  document.getElementById('edit-journal-modal').style.display = 'none';
+}
+
+async function saveEditedJournalEntry() {
+  const id = document.getElementById('edit-journal-id').value;
+  const newText = document.getElementById('edit-journal-text').value.trim();
+  const token = getStoredToken();
+
+  if (!id || !newText || !token) return;
+
+  const client = getSupabaseClient(token);
+  const { error } = await client
+    .from('journal_entries')
+    .update({ entry: newText })
+    .eq('id', id)
+    .eq('token', token);
+
+  if (error) {
+    alert('Error updating entry: ' + escapeHtml(error.message));
+  } else {
+    closeEditModal();
+    loadJournalEntries();
+  }
+}
+
+async function deleteJournalEntry(id) {
+  if (!confirm('Are you sure you want to delete this reflection entry? This action cannot be undone.')) {
+    return;
+  }
+  const token = getStoredToken();
+  if (!token) return;
+
+  const client = getSupabaseClient(token);
+  const { error } = await client
+    .from('journal_entries')
+    .delete()
+    .eq('id', id)
+    .eq('token', token);
+
+  if (error) {
+    alert('Error deleting entry: ' + escapeHtml(error.message));
+  } else {
+    loadJournalEntries();
+  }
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+</script>

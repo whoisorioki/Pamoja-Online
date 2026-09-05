@@ -7,7 +7,105 @@ pagination:
 permalink: "/week/{{ session.week }}/"
 title: "Week {{ session.week }}: {{ session.theme }}"
 ---
-<h1>Week {{ session.week }}: {{ session.theme }}</h1>
-<p>{{ session.scripture }} — {{ session.insight }}</p>
-<p>{{ session.reflection }}</p>
-<p><a href="/">Back home</a></p>
+<div class="card">
+  <span class="badge">Week {{ session.week }} of 8</span>
+  <h1 style="font-family: var(--font-heading); font-size: 1.75rem; margin-bottom: 0.5rem;">{{ session.theme }}</h1>
+  <p style="color: var(--text-secondary); font-size: 1.05rem;">{{ session.insight }}</p>
+
+    <div class="scripture-box">
+    <span class="scripture-ref">{{ session.scripture }}</span>
+  </div>
+</div>
+
+<!-- Video Join Section -->
+<div class="card">
+  <h2 class="card-title">📹 Friday Video Meet</h2>
+  <p class="card-subtitle">Join our online video gathering for Week {{ session.week }}. Room lobby & password protection enabled for privacy.</p>
+  
+  <div id="jitsi-container" class="jitsi-container">
+    <div class="jitsi-placeholder">
+      <p style="font-weight: 600; margin-bottom: 0.5rem;">Room: {{ session.jitsi_room_id }}</p>
+      <p style="font-size: 0.85rem; margin-bottom: 1rem;">Click below to load the secure video session.</p>
+      <button class="btn btn-primary" id="start-jitsi-btn" onclick="launchJitsiSession('{{ session.jitsi_room_id }}')">
+        Join Video Session
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 3-Part Group Rhythm -->
+<div class="card">
+  <h2 class="card-title" style="margin-bottom: 1.25rem;">📖 Group Discussion Rhythm</h2>
+
+  <!-- Step 1: Look Back -->
+  <div class="rhythm-step">
+    <div class="rhythm-step-header">
+      <span class="step-number">1</span>
+      <h3 class="step-title">Look Back — Reflection & Check-in</h3>
+    </div>
+    <p style="color: var(--text-secondary); padding-left: 2rem;">
+      {{ session.look_back }}
+    </p>
+  </div>
+
+  <!-- Step 2: Look Into -->
+  <div class="rhythm-step">
+    <div class="rhythm-step-header">
+      <span class="step-number">2</span>
+      <h3 class="step-title">Look Into — Word & Insight</h3>
+    </div>
+    <p style="color: var(--text-secondary); padding-left: 2rem; margin-bottom: 0.5rem;">
+      <strong>Core Question:</strong> {{ session.look_into_question }}
+    </p>
+    <p style="color: var(--text-secondary); padding-left: 2rem; font-style: italic;">
+      "{{ session.reflection }}"
+    </p>
+  </div>
+
+  <!-- Step 3: Look Up -->
+  <div class="rhythm-step">
+    <div class="rhythm-step-header">
+      <span class="step-number">3</span>
+      <h3 class="step-title">Look Up — Hope & Prayer</h3>
+    </div>
+    <ul style="padding-left: 3rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+      {% for question in session.look_up_questions %}
+        <li>{{ question }}</li>
+      {% endfor %}
+    </ul>
+    <div style="background: var(--accent-light); padding: 1rem; border-radius: 8px; margin-left: 2rem; color: var(--accent-primary);">
+      <strong>Closing Prayer:</strong> {{ session.prayer }}
+    </div>
+  </div>
+</div>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
+  <a href="/" class="btn btn-secondary">← Back to Home</a>
+  {% if session.week < 8 %}
+    <a href="/week/{{ session.week + 1 }}/" class="btn btn-primary">Next Week →</a>
+  {% endif %}
+</div>
+
+<script src="https://meet.jit.si/external_api.js"></script>
+<script>
+function launchJitsiSession(roomId) {
+  const container = document.getElementById('jitsi-container');
+  container.innerHTML = '';
+  const domain = 'meet.jit.si';
+  const options = {
+    roomName: roomId,
+    width: '100%',
+    height: 380,
+    parentNode: container,
+    configOverwrite: {
+      startWithAudioMuted: true,
+      startWithVideoMuted: false,
+      disableThirdPartyRequests: true,
+    },
+    interfaceConfigOverwrite: {
+      TOOLBAR_BUTTONS: ['microphone', 'camera', 'chat', 'raisehand', 'tileview', 'hangup']
+    }
+  };
+  const api = new JitsiMeetExternalAPI(domain, options);
+}
+</script>

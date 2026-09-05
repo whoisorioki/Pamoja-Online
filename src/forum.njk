@@ -1,0 +1,498 @@
+---
+layout: base.njk
+pagination:
+  data: spaces
+  size: 1
+  alias: space
+permalink: "/forum/{{ space.key }}/"
+title: "{{ space.title }} — Nguvu Pamoja"
+---
+<div class="card" style="background: linear-gradient(135deg, #faf3e8 0%, #ffffff 100%);">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
+    <div>
+      <span class="badge">{{ space.icon }} Passphrase-Gated Space</span>
+      <h1 style="font-family: var(--font-heading); font-size: 1.75rem; margin-bottom: 0.5rem; color: var(--accent-primary);">
+        {{ space.title }}
+      </h1>
+      <p style="color: var(--text-secondary);">
+        {{ space.description }}
+      </p>
+    </div>
+    <a href="/" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+      ⇄ Switch Space
+    </a>
+  </div>
+</div>
+
+<!-- Gate 1: Token Required Warning -->
+<div id="forum-token-gate" class="card" style="display: none; background: #fff8ee; border-color: #f2d2a9;">
+  <h2 class="card-title" style="color: #8a4b16;">🔑 Anonymous Token Required</h2>
+  <p class="card-subtitle" style="color: #6e411b;">
+    You must set or paste your 3-word token before accessing forum spaces.
+  </p>
+  <a href="/#token-setup" class="btn btn-primary">Set Up Anonymous Token</a>
+</div>
+
+<!-- Gate 2: Space Passphrase Form -->
+<div id="forum-passphrase-gate" class="card" style="display: none; background: #ffffff;">
+  <h2 class="card-title">🔒 Space Passphrase Required</h2>
+  <p class="card-subtitle">
+    Enter the per-cycle passphrase for the {{ space.title }}. Ask your facilitator if you do not have it.
+  </p>
+
+  <form id="passphrase-form" onsubmit="handlePassphraseSubmit(event)" style="margin-top: 1rem;">
+    <div class="form-group">
+      <label for="space-passphrase-input" class="form-label">Passphrase for {{ space.key }} space</label>
+      <input type="password" id="space-passphrase-input" class="form-control" placeholder="Enter passphrase..." required>
+    </div>
+    <div id="passphrase-error-msg" style="display: none; color: #b93829; font-size: 0.9rem; margin-bottom: 1rem;"></div>
+    <button type="submit" id="passphrase-submit-btn" class="btn btn-primary">
+      Enter {{ space.title }}
+    </button>
+  </form>
+</div>
+
+<!-- Forum Active Workspace (Hidden until both gates pass) -->
+<div id="forum-workspace" style="display: none;">
+
+  <!-- Post Composer Card -->
+  <div class="card" id="forum-composer-card">
+    <h2 class="card-title">✍️ Post to {{ space.title }}</h2>
+
+    <!-- Reply Banner -->
+    <div id="reply-target-banner" style="display: none; background: var(--accent-light); padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; color: var(--accent-primary); font-size: 0.9rem; align-items: center; justify-content: space-between;">
+      <span>Replying to <strong id="reply-target-name"></strong></span>
+      <button onclick="cancelReplyTarget()" style="background:none; border:none; color: var(--accent-primary); text-decoration: underline; cursor: pointer; font-size: 0.8rem;">Cancel Reply</button>
+    </div>
+
+    <form id="forum-post-form" onsubmit="handlePostSubmit(event)">
+      <input type="hidden" id="forum-reply-to-id" value="">
+
+      <div class="form-group">
+        <label for="forum-nickname-input" class="form-label">Display Nickname (Pseudonym)</label>
+        <input 
+          type="text" 
+          id="forum-nickname-input" 
+          class="form-control" 
+          placeholder="e.g. SeekingLight, GraceWalker, BrotherJ" 
+          style="max-width: 320px;" 
+          required>
+        <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;">
+          Editable per post. Never use real names, emails, or your 3-word private token.
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="forum-body-input" class="form-label">Message</label>
+        <textarea 
+          id="forum-body-input" 
+          class="form-control" 
+          style="min-height: 110px;" 
+          placeholder="Share your encouragement, question, or reflection with the space..." 
+          required></textarea>
+      </div>
+
+      <button type="submit" id="forum-post-submit-btn" class="btn btn-primary">
+        Post Message
+      </button>
+    </form>
+  </div>
+
+  <!-- Post Feed Card -->
+  <div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h2 class="card-title" style="margin-bottom: 0;">💬 Recent Messages</h2>
+      <button onclick="loadForumPosts()" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+        🔄 Refresh Feed
+      </button>
+    </div>
+
+    <div id="forum-loading-spinner" style="text-align: center; color: var(--text-muted); padding: 1.5rem 0;">
+      Loading messages...
+    </div>
+
+    <div id="forum-posts-list" style="display: flex; flex-direction: column; gap: 1rem;">
+    </div>
+  </div>
+
+</div>
+
+<!-- Edit Post Modal -->
+<div id="edit-post-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center;">
+  <div class="card" style="width: 90%; max-width: 500px; background: #ffffff;">
+    <h3 class="card-title">Edit Your Message</h3>
+    <input type="hidden" id="edit-post-id">
+    <div class="form-group">
+      <textarea id="edit-post-body" class="form-control" style="min-height: 120px;"></textarea>
+    </div>
+    <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+      <button class="btn btn-secondary" onclick="closeEditPostModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditedPost()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const currentSpace = "{{ space.key }}";
+let postsMap = {};
+
+document.addEventListener('DOMContentLoaded', () => {
+  initForumPage();
+});
+
+async function initForumPage() {
+  const token = getStoredToken();
+  const tokenGate = document.getElementById('forum-token-gate');
+  const passGate = document.getElementById('forum-passphrase-gate');
+  const workspace = document.getElementById('forum-workspace');
+
+  if (!token) {
+    tokenGate.style.display = 'block';
+    passGate.style.display = 'none';
+    workspace.style.display = 'none';
+    return;
+  }
+
+  tokenGate.style.display = 'none';
+
+  const passphrase = getStoredPassphrase(currentSpace);
+  if (!passphrase) {
+    passGate.style.display = 'block';
+    workspace.style.display = 'none';
+    return;
+  }
+
+  // Validate passphrase with test query
+  const isValid = await validateSpacePassphrase(token, passphrase, currentSpace);
+  if (isValid) {
+    passGate.style.display = 'none';
+    workspace.style.display = 'block';
+    
+    // Prefill nickname if available
+    const nicknameInput = document.getElementById('forum-nickname-input');
+    nicknameInput.value = getStoredNickname();
+
+    loadForumPosts();
+  } else {
+    // Clear invalid passphrase
+    clearStoredPassphrase(currentSpace);
+    passGate.style.display = 'block';
+    workspace.style.display = 'none';
+    document.getElementById('passphrase-error-msg').style.display = 'block';
+    document.getElementById('passphrase-error-msg').innerText = 'Incorrect passphrase for this space. Please check with your group facilitator.';
+  }
+}
+
+async function validateSpacePassphrase(token, passphrase, spaceKey) {
+  const client = getSupabaseClient(token, passphrase, spaceKey);
+  if (!client) return false;
+
+  try {
+    const { data, error } = await client.rpc('is_valid_space_passphrase', {
+      p_space: spaceKey,
+      p_passphrase: passphrase
+    });
+    if (!error && typeof data === 'boolean') {
+      return data;
+    }
+  } catch (err) {
+    console.warn('RPC validation fallback:', err);
+  }
+
+  const { data, error } = await client
+    .from('forum_posts')
+    .select('id')
+    .eq('space', spaceKey)
+    .limit(1);
+
+  return !error;
+}
+
+async function handlePassphraseSubmit(e) {
+  e.preventDefault();
+  const token = getStoredToken();
+  const passphraseInput = document.getElementById('space-passphrase-input');
+  const passphrase = passphraseInput.value.trim();
+  const submitBtn = document.getElementById('passphrase-submit-btn');
+
+  if (!passphrase) return;
+
+  submitBtn.disabled = true;
+  submitBtn.innerText = 'Validating passphrase...';
+
+  const isValid = await validateSpacePassphrase(token, passphrase, currentSpace);
+
+  if (isValid) {
+    setStoredPassphrase(currentSpace, passphrase);
+    initForumPage();
+  } else {
+    document.getElementById('passphrase-error-msg').style.display = 'block';
+    document.getElementById('passphrase-error-msg').innerText = 'Incorrect passphrase. Please verify with your facilitator.';
+    submitBtn.disabled = false;
+    submitBtn.innerText = 'Enter {{ space.title }}';
+  }
+}
+
+async function loadForumPosts() {
+  const token = getStoredToken();
+  const passphrase = getStoredPassphrase(currentSpace);
+  if (!token || !passphrase) return;
+
+  const client = getSupabaseClient(token, passphrase, currentSpace);
+  const spinner = document.getElementById('forum-loading-spinner');
+  const listEl = document.getElementById('forum-posts-list');
+
+  spinner.style.display = 'block';
+  listEl.innerHTML = '';
+  postsMap = {};
+
+  if (!client) {
+    spinner.innerText = 'Unable to connect to forum database.';
+    return;
+  }
+
+  const { data, error } = await client
+    .from('forum_posts')
+    .select('*')
+    .eq('space', currentSpace)
+    .order('created_at', { ascending: false });
+
+  spinner.style.display = 'none';
+
+  if (error) {
+    console.error('Error fetching forum posts:', error);
+    listEl.innerHTML = `<p style="color: var(--text-secondary);">Error loading messages: ${escapeHtml(error.message)}</p>`;
+    return;
+  }
+
+  const posts = data || [];
+
+  if (posts.length === 0) {
+    listEl.innerHTML = `
+      <div style="text-align: center; padding: 2rem; background: var(--bg-card-subtle); border-radius: var(--border-radius);">
+        <p style="color: var(--text-secondary); font-weight: 500;">No posts in this space yet.</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+          Be the first to share an encouragement or question!
+        </p>
+      </div>
+    `;
+    return;
+  }
+
+  // Map posts for reference
+  posts.forEach(p => { postsMap[p.id] = p; });
+
+  posts.forEach(post => {
+    const isOwner = (post.token === token);
+    const dateStr = new Date(post.created_at).toLocaleDateString(undefined, {
+      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+
+    const card = document.createElement('div');
+    card.style.cssText = 'background: var(--bg-card-subtle); padding: 1.1rem; border-radius: var(--border-radius); border: 1px solid var(--border-color); position: relative;';
+
+    let replyContextHtml = '';
+    if (post.reply_to && postsMap[post.reply_to]) {
+      const parent = postsMap[post.reply_to];
+      replyContextHtml = `
+        <div style="background: rgba(0,0,0,0.03); border-left: 3px solid var(--accent-primary); padding: 0.4rem 0.75rem; margin-bottom: 0.5rem; border-radius: 4px; font-size: 0.85rem; color: var(--text-secondary);">
+          Replying to <strong>${escapeHtml(parent.nickname)}</strong>: "${escapeHtml(parent.body.substring(0, 70))}${parent.body.length > 70 ? '...' : ''}"
+        </div>
+      `;
+    }
+
+    let flaggedBadge = '';
+    if (post.flagged) {
+      flaggedBadge = `<span style="font-size: 0.75rem; color: #b93829; background: #fdf2f0; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600;">🚩 Reported for review</span>`;
+    }
+
+    card.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">👤 ${escapeHtml(post.nickname)}</span>
+          ${isOwner ? '<span class="badge" style="margin-bottom:0; font-size:0.65rem; padding: 0.15rem 0.4rem;">You</span>' : ''}
+          ${flaggedBadge}
+        </div>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">${dateStr}</span>
+      </div>
+
+      ${replyContextHtml}
+
+      <p style="color: var(--text-primary); white-space: pre-wrap; font-size: 0.95rem; margin-bottom: 0.75rem;">${escapeHtml(post.body)}</p>
+
+      <div style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center; flex-wrap: wrap;">
+        <button onclick="initiateReply('${post.id}')" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+          💬 Reply
+        </button>
+
+        ${isOwner ? `
+          <button onclick="openEditPostModal('${post.id}')" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+            ✏️ Edit
+          </button>
+          <button onclick="deletePost('${post.id}')" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; color: #b93829;">
+            🗑️ Delete
+          </button>
+        ` : `
+          <button onclick="flagPost('${post.id}')" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; color: var(--text-muted);" title="Report post to facilitators">
+            🚩 Report
+          </button>
+        `}
+      </div>
+    `;
+
+    listEl.appendChild(card);
+  });
+}
+
+async function handlePostSubmit(e) {
+  e.preventDefault();
+  const token = getStoredToken();
+  const passphrase = getStoredPassphrase(currentSpace);
+  if (!token || !passphrase) return;
+
+  const nickname = document.getElementById('forum-nickname-input').value.trim();
+  const body = document.getElementById('forum-body-input').value.trim();
+  const replyTo = document.getElementById('forum-reply-to-id').value || null;
+  const submitBtn = document.getElementById('forum-post-submit-btn');
+
+  // Client-side Token Firewall: Prevent nickname matching token
+  if (nickname.toLowerCase() === token.toLowerCase()) {
+    alert("For your security, do not use your 3-word private token as a public nickname.");
+    return;
+  }
+
+  if (!nickname || !body) return;
+
+  submitBtn.disabled = true;
+  submitBtn.innerText = 'Posting message...';
+
+  // Save nickname preference
+  setStoredNickname(nickname);
+
+  const client = getSupabaseClient(token, passphrase, currentSpace);
+  const { data, error } = await client
+    .from('forum_posts')
+    .insert([
+      {
+        token: token,
+        space: currentSpace,
+        nickname: nickname,
+        body: body,
+        reply_to: replyTo
+      }
+    ]);
+
+  if (error) {
+    alert('Error posting message: ' + escapeHtml(error.message));
+  } else {
+    document.getElementById('forum-body-input').value = '';
+    cancelReplyTarget();
+    loadForumPosts();
+  }
+
+  submitBtn.disabled = false;
+  submitBtn.innerText = 'Post Message';
+}
+
+function initiateReply(postId) {
+  const parent = postsMap[postId];
+  if (!parent) return;
+
+  document.getElementById('forum-reply-to-id').value = postId;
+  document.getElementById('reply-target-name').innerText = parent.nickname;
+  document.getElementById('reply-target-banner').style.display = 'flex';
+  document.getElementById('forum-body-input').focus();
+}
+
+function cancelReplyTarget() {
+  document.getElementById('forum-reply-to-id').value = '';
+  document.getElementById('reply-target-banner').style.display = 'none';
+}
+
+function openEditPostModal(postId) {
+  const post = postsMap[postId];
+  if (!post) return;
+
+  document.getElementById('edit-post-id').value = postId;
+  document.getElementById('edit-post-body').value = post.body;
+  document.getElementById('edit-post-modal').style.display = 'flex';
+}
+
+function closeEditPostModal() {
+  document.getElementById('edit-post-modal').style.display = 'none';
+}
+
+async function saveEditedPost() {
+  const postId = document.getElementById('edit-post-id').value;
+  const newBody = document.getElementById('edit-post-body').value.trim();
+  const token = getStoredToken();
+  const passphrase = getStoredPassphrase(currentSpace);
+
+  if (!postId || !newBody || !token || !passphrase) return;
+
+  const client = getSupabaseClient(token, passphrase, currentSpace);
+  
+  // Double-scoped by token + id for defense in depth
+  const { error } = await client
+    .from('forum_posts')
+    .update({ body: newBody })
+    .eq('id', postId)
+    .eq('token', token);
+
+  if (error) {
+    alert('Error updating post: ' + escapeHtml(error.message));
+  } else {
+    closeEditPostModal();
+    loadForumPosts();
+  }
+}
+
+async function deletePost(postId) {
+  if (!confirm('Are you sure you want to delete this message?')) return;
+  const token = getStoredToken();
+  const passphrase = getStoredPassphrase(currentSpace);
+  if (!token || !passphrase) return;
+
+  const client = getSupabaseClient(token, passphrase, currentSpace);
+
+  // Double-scoped by token + id for defense in depth
+  const { error } = await client
+    .from('forum_posts')
+    .delete()
+    .eq('id', postId)
+    .eq('token', token);
+
+  if (error) {
+    alert('Error deleting post: ' + escapeHtml(error.message));
+  } else {
+    loadForumPosts();
+  }
+}
+
+async function flagPost(postId) {
+  if (!confirm('Report this post to group facilitators for review?')) return;
+  const token = getStoredToken();
+  const passphrase = getStoredPassphrase(currentSpace);
+  if (!token || !passphrase) return;
+
+  const client = getSupabaseClient(token, passphrase, currentSpace);
+
+  // Flag post (allowed for any space-holder)
+  const { error } = await client
+    .from('forum_posts')
+    .update({ flagged: true })
+    .eq('id', postId);
+
+  if (error) {
+    alert('Error reporting post: ' + escapeHtml(error.message));
+  } else {
+    alert('Thank you. The post has been flagged for facilitator review.');
+    loadForumPosts();
+  }
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+</script>

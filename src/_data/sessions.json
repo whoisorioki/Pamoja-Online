@@ -1,10 +1,122 @@
 [
-  { "week": 1, "theme": "Admitting the Struggle", "scripture": "Psalm 51:1–10", "insight": "Freedom begins with honesty. Confession brings light.", "reflection": "Where can you be honest with yourself and God this week?" },
-  { "week": 2, "theme": "Hope and Healing", "scripture": "Romans 8:1–2", "insight": "No condemnation in Christ.", "reflection": "How can you receive God's grace for your struggle?" },
-  { "week": 3, "theme": "Accountability and Community", "scripture": "James 5:16", "insight": "Healing grows in fellowship.", "reflection": "Who can you lean on this week?" },
-  { "week": 4, "theme": "Dealing with Triggers", "scripture": "1 Corinthians 10:13", "insight": "God provides a way out.", "reflection": "What triggers do you face, and what healthy responses can you practice?" },
-  { "week": 5, "theme": "Forgiveness and Self-worth", "scripture": "Isaiah 43:1–2", "insight": "You are redeemed and loved.", "reflection": "Who or what needs your forgiveness? How will you accept God's forgiveness yourself?" },
-  { "week": 6, "theme": "Rebuilding Relationships", "scripture": "Colossians 3:12–14", "insight": "Compassion rebuilds what was broken.", "reflection": "What step can you take to restore or strengthen a relationship?" },
-  { "week": 7, "theme": "Living in Freedom", "scripture": "Galatians 5:1", "insight": "Christ sets us free to live differently.", "reflection": "What does freedom in Christ look like?" },
-  { "week": 8, "theme": "Perseverance", "scripture": "Philippians 3:12–14", "insight": "Press on toward your goal.", "reflection": "What keeps you motivated to keep moving forward?" }
+  {
+    "week": 1,
+    "theme": "Admitting the Struggle",
+    "scripture": "Psalm 51:1–10",
+    "insight": "Freedom begins with honesty. Confession brings light.",
+    "reflection": "Where can you be honest with yourself and God this week?",
+    "look_back": "What was one victory and one challenge you experienced over the past week?",
+    "look_into_question": "What parts of your struggle feel hardest to put into words?",
+    "look_up_questions": [
+      "What does Psalm 51 reveal about God's willingness to restore us?",
+      "How can honesty bring light into areas of shame?"
+    ],
+    "prayer": "Lord, give me the courage to step into the light of honesty today. Amen.",
+    "jitsi_room_id": "NguvuPamoja-W1-Honesty"
+  },
+  {
+    "week": 2,
+    "theme": "Hope and Healing",
+    "scripture": "Romans 8:1–2",
+    "insight": "There is now no condemnation for those who are in Christ Jesus.",
+    "reflection": "How can you receive God's grace for your struggle?",
+    "look_back": "Did you notice any moments of guilt this week? How did you respond to them?",
+    "look_into_question": "What is the difference between conviction that heals and condemnation that hurts?",
+    "look_up_questions": [
+      "How does knowing you are not condemned change your perspective on healing?",
+      "Where do you need to extend grace to yourself?"
+    ],
+    "prayer": "Father, help me rest in Your grace and release the burden of self-condemnation. Amen.",
+    "jitsi_room_id": "NguvuPamoja-W2-Hope"
+  },
+  {
+    "week": 3,
+    "theme": "Accountability and Community",
+    "scripture": "James 5:16",
+    "insight": "Healing grows in fellowship when we walk together.",
+    "reflection": "Who can you lean on this week?",
+    "look_back": "Did you isolate yourself at any point this week, or did you reach out?",
+    "look_into_question": "Why is vulnerability with trusted brothers or sisters so essential for recovery?",
+    "look_up_questions": [
+      "What prevents us from seeking accountability?",
+      "How does mutual prayer strengthen us?"
+    ],
+    "prayer": "Lord, build surrounding strength in my life. Help me be vulnerable with trusted support. Amen.",
+    "jitsi_room_id": "NguvuPamoja-W3-Community"
+  },
+  {
+    "week": 4,
+    "theme": "Dealing with Triggers",
+    "scripture": "1 Corinthians 10:13",
+    "insight": "God is faithful; He will provide a way out so you can endure.",
+    "reflection": "What triggers do you face, and what healthy responses can you practice?",
+    "look_back": "What situations, emotions, or environments tested your resolve this week?",
+    "look_into_question": "Can you identify the early warning signs before a trigger becomes an action?",
+    "look_up_questions": [
+      "What 'way out' has God already placed in your daily routine?",
+      "How can you pause before reacting?"
+    ],
+    "prayer": "God, grant me discernment to recognize triggers early and wisdom to take the escape route You provide. Amen.",
+    "jitsi_room_id": "NguvuPamoja-W4-Triggers"
+  },
+  {
+    "week": 5,
+    "theme": "Forgiveness and Self-worth",
+    "scripture": "Isaiah 43:1–2",
+    "insight": "Do not fear, for I have redeemed you; I have called you by name; you are mine.",
+    "reflection": "Who or what needs your forgiveness? How will you accept God's forgiveness yourself?",
+    "look_back": "In what ways did resentment or old wounds weigh on your heart this week?",
+    "look_into_question": "How does holding onto past hurts affect your freedom today?",
+    "look_up_questions": [
+      "What does it mean to be called by name by God?",
+      "How does forgiveness open the door to true self-worth?"
+    ],
+    "prayer": "Father, thank You for redeeming me. Give me grace to forgive others and accept Your unconditional love. Amen.",
+    "jitsi_room_id": "NguvuPamoja-W5-Forgiveness"
+  },
+  {
+    "week": 6,
+    "theme": "Rebuilding Relationships",
+    "scripture": "Colossians 3:12–14",
+    "insight": "Clothe yourselves with compassion, kindness, humility, gentleness and patience.",
+    "reflection": "What step can you take to restore or strengthen a relationship?",
+    "look_back": "How did your interactions with family, friends, or group members feel this week?",
+    "look_into_question": "What practical steps can you take to rebuild trust where it was strained?",
+    "look_up_questions": [
+      "How does practicing patience transform daily relationships?",
+      "Which virtue in Colossians 3:12 do you need most this week?"
+    ],
+    "prayer": "Lord, teach me patience and humility as I work to restore peace and trust in my relationships. Amen.",
+    "jitsi_room_id": "NguvuPamoja-W6-Relationships"
+  },
+  {
+    "week": 7,
+    "theme": "Living in Freedom",
+    "scripture": "Galatians 5:1",
+    "insight": "It is for freedom that Christ has set us free. Stand firm, then.",
+    "reflection": "What does freedom in Christ look like in your daily choices?",
+    "look_back": "Where did you experience a moment of breakthrough or clarity this week?",
+    "look_into_question": "What habits or routines help guard the freedom you are building?",
+    "look_up_questions": [
+      "What does standing firm require when old temptations return?",
+      "How can you celebrate progress without letting your guard down?"
+    ],
+    "prayer": "Jesus, thank You for setting me free. Help me stand firm every single day. Amen.",
+    "jitsi_room_id": "NguvuPamoja-W7-Freedom"
+  },
+  {
+    "week": 8,
+    "theme": "Perseverance",
+    "scripture": "Philippians 3:12–14",
+    "insight": "Forgetting what is behind and straining toward what is ahead, I press on.",
+    "reflection": "What keeps you motivated to keep moving forward in your journey?",
+    "look_back": "Reflecting on the 8 weeks, what is the single biggest change in how you approach your struggle?",
+    "look_into_question": "How will you maintain your momentum beyond this cycle?",
+    "look_up_questions": [
+      "What promise of God will anchor you in the weeks ahead?",
+      "How can you help someone else walking a similar path?"
+    ],
+    "prayer": "Lord, thank You for bringing me through. Keep my eyes fixed on You as I press forward in strength. Amen.",
+    "jitsi_room_id": "NguvuPamoja-W8-Perseverance"
+  }
 ]

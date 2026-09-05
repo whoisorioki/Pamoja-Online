@@ -1,0 +1,145 @@
+---
+layout: base.njk
+pagination:
+  data: sessions
+  size: 1
+  alias: session
+permalink: "/check-in/{{ session.week }}/"
+title: "Week {{ session.week }} Check-in — Nguvu Pamoja"
+---
+<div class="card" style="background: linear-gradient(135deg, #faf3e8 0%, #ffffff 100%);">
+  <span class="badge">Week {{ session.week }} Ritual</span>
+  <h1 style="font-family: var(--font-heading); font-size: 1.75rem; margin-bottom: 0.5rem; color: var(--accent-primary);">
+    Weekly Check-in: {{ session.theme }}
+  </h1>
+  <p style="color: var(--text-secondary);">
+    Share your challenge and victory for this week. Your check-in is saved anonymously under your token.
+  </p>
+</div>
+
+<!-- Token Gate Warning (hidden if token present) -->
+<div id="checkin-token-gate" class="card" style="display: none; background: #fff8ee; border-color: #f2d2a9;">
+  <h2 class="card-title" style="color: #8a4b16;">🔑 Anonymous Token Required</h2>
+  <p class="card-subtitle" style="color: #6e411b;">
+    You need an active 3-word token to submit a check-in.
+  </p>
+  <a href="/#token-setup" class="btn btn-primary">Generate or Paste Token</a>
+</div>
+
+<!-- Check-in Form Card -->
+<div id="checkin-form-card" class="card">
+  <form id="checkin-form" onsubmit="handleCheckinSubmit(event)">
+    <input type="hidden" id="checkin-week" value="{{ session.week }}">
+
+    <div class="form-group">
+      <label for="checkin-challenge" class="form-label">
+        What was your biggest challenge or struggle this week?
+      </label>
+      <textarea 
+        id="checkin-challenge" 
+        class="form-control" 
+        placeholder="Be honest with yourself... e.g. Experienced strong temptation on Wednesday evening when tired." 
+        required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="checkin-victory" class="form-label">
+        What was one victory or moment of growth you experienced?
+      </label>
+      <textarea 
+        id="checkin-victory" 
+        class="form-control" 
+        placeholder="E.g. Reached out to a brother/sister when triggered, or stayed consistent in prayer." 
+        required></textarea>
+    </div>
+
+    <button type="submit" id="checkin-submit-btn" class="btn btn-primary" style="width: 100%;">
+      Save Confidential Check-in
+    </button>
+  </form>
+
+  <!-- Informative Feedback / Success Box -->
+  <div id="checkin-success-box" style="display: none; background: #f0f7f4; border: 1px solid #c3e6d5; padding: 1.25rem; border-radius: var(--border-radius); text-align: center; margin-top: 1rem;">
+    <p style="font-size: 1.25rem; margin-bottom: 0.5rem;">✅</p>
+    <h3 style="font-family: var(--font-heading); color: #1e5e41; font-size: 1.2rem; margin-bottom: 0.25rem;">
+      Your check-in was saved successfully
+    </h3>
+    <p style="font-size: 0.9rem; color: #2e7a57; margin-bottom: 1rem;">
+      Thank you for being honest and sharing your journey.
+    </p>
+    <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+      <a href="/journal/" class="btn btn-primary">View Journal History</a>
+      <a href="/week/{{ session.week }}/" class="btn btn-secondary">Return to Week {{ session.week }}</a>
+    </div>
+  </div>
+</div>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
+  <a href="/week/{{ session.week }}/" class="btn btn-secondary">← Back to Week {{ session.week }}</a>
+  {% if session.week < 8 %}
+    <a href="/check-in/{{ session.week + 1 }}/" class="btn btn-secondary">Week {{ session.week + 1 }} Check-in →</a>
+  {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const token = getStoredToken();
+  const gateEl = document.getElementById('checkin-token-gate');
+  const formCardEl = document.getElementById('checkin-form-card');
+
+  if (!token) {
+    gateEl.style.display = 'block';
+    formCardEl.style.display = 'none';
+  } else {
+    gateEl.style.display = 'none';
+    formCardEl.style.display = 'block';
+  }
+});
+
+async function handleCheckinSubmit(e) {
+  e.preventDefault();
+  const token = getStoredToken();
+  if (!token) {
+    alert('Please set your anonymous 3-word token first.');
+    return;
+  }
+
+  const week = parseInt(document.getElementById('checkin-week').value, 10);
+  const challenge = document.getElementById('checkin-challenge').value.trim();
+  const victory = document.getElementById('checkin-victory').value.trim();
+  const submitBtn = document.getElementById('checkin-submit-btn');
+
+  submitBtn.disabled = true;
+  submitBtn.innerText = 'Saving check-in...';
+
+  const client = getSupabaseClient(token);
+
+  if (!client) {
+    alert('Database connection error. Please try again.');
+    submitBtn.disabled = false;
+    submitBtn.innerText = 'Save Confidential Check-in';
+    return;
+  }
+
+  const { data, error } = await client
+    .from('check_ins')
+    .insert([
+      {
+        token: token,
+        week: week,
+        challenge: challenge,
+        victory: victory
+      }
+    ]);
+
+  if (error) {
+    console.error('Error saving check-in:', error);
+    alert('Error saving check-in: ' + error.message);
+    submitBtn.disabled = false;
+    submitBtn.innerText = 'Save Confidential Check-in';
+  } else {
+    document.getElementById('checkin-form').style.display = 'none';
+    document.getElementById('checkin-success-box').style.display = 'block';
+  }
+}
+</script>

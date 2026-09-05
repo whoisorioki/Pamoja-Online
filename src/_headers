@@ -1,0 +1,15 @@
+# Cloudflare Pages Custom HTTP Headers & Security Policy
+# Location: src/_headers (copied to _site via Eleventy passthrough)
+
+/*
+  # Security Headers
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  
+  # Content Security Policy (CSP)
+  # Restricts script execution to local assets and trusted Supabase CDN
+  # Note: 'unsafe-inline' is required for template script/style tags and inline state hydration
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; connect-src 'self' https://*.supabase.co; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;
