@@ -71,6 +71,13 @@ if (indexHtml.includes('window.SUPABASE_ANON_KEY = "ey')) {
   failed = true;
 }
 
+if (indexHtml.includes('window.JAAS_APP_ID = "vpaas-magic-cookie-')) {
+  console.log('  ✅ window.JAAS_APP_ID correctly injected');
+} else {
+  console.error('  ❌ Error: window.JAAS_APP_ID is missing or empty in index.html');
+  failed = true;
+}
+
 // 3. Security Audit: Check for service_role leaks across all generated files
 console.log('\n--- 3. Security Audit (No service_role credentials) ---');
 function scanDirForLeaks(dir) {
@@ -119,33 +126,33 @@ console.log('\n--- 5. Jitsi Production Hardening Checks ---');
 const headersPath = path.resolve(siteDir, '_headers');
 const headers = fs.readFileSync(headersPath, 'utf-8');
 
-if (headers.includes('https://meet.jit.si') && headers.includes('frame-src https://meet.jit.si')) {
-  console.log('  ✅ CSP allowlists meet.jit.si (script-src/frame-src/connect-src)');
+if (headers.includes('https://meet.jit.si') && headers.includes('https://8x8.vc') && headers.includes('frame-src https://meet.jit.si https://8x8.vc')) {
+  console.log('  ✅ CSP allowlists meet.jit.si and 8x8.vc (script-src/frame-src/connect-src)');
 } else {
-  console.error('  ❌ Error: CSP in _headers does not allowlist meet.jit.si');
+  console.error('  ❌ Error: CSP in _headers does not allowlist meet.jit.si and 8x8.vc');
   failed = true;
 }
 
-if (headers.includes('camera=(self "https://meet.jit.si")')) {
-  console.log('  ✅ Permissions-Policy grants camera/mic to the meet.jit.si frame only');
+if (headers.includes('camera=(self "https://meet.jit.si" "https://8x8.vc")')) {
+  console.log('  ✅ Permissions-Policy grants camera/mic to meet.jit.si and 8x8.vc frames');
 } else {
-  console.error('  ❌ Error: Permissions-Policy camera/mic not scoped to meet.jit.si');
+  console.error('  ❌ Error: Permissions-Policy camera/mic not scoped to meet.jit.si and 8x8.vc');
   failed = true;
 }
 
-// Lazy-load only: no eager <script src="https://meet.jit.si ..."> tag in any week page
+// Lazy-load only: no eager <script src="https://meet.jit.si ..."> or <script src="https://8x8.vc ..."> tag in any week page
 let eagerJitsiTag = false;
 for (let w = 1; w <= 8; w++) {
   const weekHtml = fs.readFileSync(path.resolve(siteDir, `week/${w}/index.html`), 'utf-8');
-  if (weekHtml.includes('<script src="https://meet.jit.si')) {
-    console.error(`  ❌ Eager meet.jit.si script tag found in week/${w}/index.html`);
+  if (weekHtml.includes('<script src="https://meet.jit.si') || weekHtml.includes('<script src="https://8x8.vc')) {
+    console.error(`  ❌ Eager video script tag found in week/${w}/index.html`);
     eagerJitsiTag = true;
   }
 }
 if (eagerJitsiTag) {
   failed = true;
 } else {
-  console.log('  ✅ No eager meet.jit.si script tag in any week page (lazy-load only)');
+  console.log('  ✅ No eager Jitsi/JaaS script tag in any week page (lazy-load only)');
 }
 
 if (failed) {

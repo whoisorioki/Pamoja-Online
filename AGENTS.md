@@ -80,7 +80,7 @@ as the code change.
 | Cline pointer is a symlink, not a copy | `.clinerules` → `AGENTS.md` | [CONFIRMED] |
 | Canonical product docs live under `docs/` | `docs/nguvu-pamoja-sot.md`, `docs/nguvu-pamoja-implementation-plan.md` | [CONFIRMED] |
 | `docs/` is outside Eleventy input — not published to `_site/` | `eleventy.config.js` `dir.input` = `src` | [CONFIRMED] |
-| Jitsi `external_api.js` embed | week templates | [CONFIRMED] — present in `src/week.njk` |
+| Jitsi `external_api.js` embed via 8x8 JaaS (`8x8.vc`), `meet.jit.si` fallback | week templates | [CONFIRMED] — `src/week.njk` lazy-loads `https://8x8.vc/<JAAS_APP_ID>/external_api.js` (or `meet.jit.si` fallback) on click; `window.JAAS_APP_ID` injected via `src/_includes/base.njk` from `env.JAAS_APP_ID` |
 | Check-in / journal / forum pages | page map SOT §10 | [CONFIRMED] — `src/check-in.njk`, `src/journal.njk`, `src/forum.njk` |
 | Supabase JS client in the frontend | stack SOT §6.1 | [CONFIRMED] — `src/assets/js/supabase.js` with custom headers |
 | Schema + RLS for `check_ins`, `journal_entries`, `forum_posts` | SOT §8 | [CONFIRMED] — `supabase/migrations/20260904000000_schema_and_rls.sql` & `20260905000000_harden_flag_policy.sql`, deployed to live Supabase (`ehhxoanfbisdzkumsmwf`) |

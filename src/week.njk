@@ -26,9 +26,14 @@ title: "Week {{ session.week }}: {{ session.theme }}"
     <div class="jitsi-placeholder">
       <p style="font-weight: 600; margin-bottom: 0.5rem;">Room: {{ session.jitsi_room_id }}</p>
       <p style="font-size: 0.85rem; margin-bottom: 1rem;">Click below to load the secure video session.</p>
-      <button class="btn btn-primary" id="start-jitsi-btn" onclick="launchJitsiSession('{{ session.jitsi_room_id }}')">
-        Join Video Session
-      </button>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; align-items: center;">
+        <button class="btn btn-primary" id="start-jitsi-btn" onclick="launchJitsiSession('{{ session.jitsi_room_id }}')">
+          Join Video Session
+        </button>
+        <a id="direct-jitsi-link" href="https://meet.jit.si/{{ session.jitsi_room_id }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="font-size: 0.9rem;">
+          Open in New Tab ↗
+        </a>
+      </div>
     </div>
   </div>
 </div>
@@ -87,30 +92,58 @@ title: "Week {{ session.week }}: {{ session.theme }}"
 </div>
 
 <script>
+function getJitsiConfig(roomId) {
+  const jaasAppId = window.JAAS_APP_ID;
+  if (jaasAppId && jaasAppId.trim() !== '') {
+    return {
+      scriptUrl: `https://8x8.vc/${jaasAppId}/external_api.js`,
+      domain: '8x8.vc',
+      roomName: `${jaasAppId}/${roomId}`,
+      directUrl: `https://8x8.vc/${jaasAppId}/${roomId}`
+    };
+  }
+  return {
+    scriptUrl: 'https://meet.jit.si/external_api.js',
+    domain: 'meet.jit.si',
+    roomName: roomId,
+    directUrl: `https://meet.jit.si/${roomId}`
+  };
+}
+
+// Update direct link href once DOM and window config are available
+document.addEventListener('DOMContentLoaded', () => {
+  const directLink = document.getElementById('direct-jitsi-link');
+  if (directLink) {
+    const config = getJitsiConfig('{{ session.jitsi_room_id }}');
+    directLink.href = config.directUrl;
+  }
+});
+
 function launchJitsiSession(roomId) {
   const container = document.getElementById('jitsi-container');
   // Match the container's computed height so Jitsi fills the responsive space
   const containerHeight = container.offsetHeight || 380;
   container.innerHTML = '';
 
-  // Lazy-load Jitsi script if not already loaded
+  const config = getJitsiConfig(roomId);
+
+  // Lazy-load Jitsi / JaaS script if not already loaded
   if (typeof JitsiMeetExternalAPI === 'undefined') {
     const script = document.createElement('script');
-    script.src = 'https://meet.jit.si/external_api.js';
-    script.onload = () => initJitsi(container, roomId, containerHeight);
+    script.src = config.scriptUrl;
+    script.onload = () => initJitsi(container, config, containerHeight);
     script.onerror = () => {
-      container.innerHTML = '<div class="jitsi-placeholder"><p style="color: #b93829; font-weight: 600;">Unable to load video provider.</p><p style="font-size: 0.85rem; margin-top: 0.5rem;">Please disable ad-blockers for this site and try again.</p></div>';
+      container.innerHTML = `<div class="jitsi-placeholder"><p style="color: #b93829; font-weight: 600;">Unable to load video provider.</p><p style="font-size: 0.85rem; margin-top: 0.5rem;">Please check your connection or <a href="${config.directUrl}" target="_blank" rel="noopener" style="color: var(--accent-primary);">open the meeting in a new tab</a>.</p></div>`;
     };
     document.head.appendChild(script);
   } else {
-    initJitsi(container, roomId, containerHeight);
+    initJitsi(container, config, containerHeight);
   }
 }
 
-function initJitsi(container, roomId, height) {
-  const domain = 'meet.jit.si';
+function initJitsi(container, config, height) {
   const options = {
-    roomName: roomId,
+    roomName: config.roomName,
     width: '100%',
     height: height,
     parentNode: container,
@@ -124,9 +157,9 @@ function initJitsi(container, roomId, height) {
     }
   };
   try {
-    new JitsiMeetExternalAPI(domain, options);
+    new JitsiMeetExternalAPI(config.domain, options);
   } catch (e) {
-    container.innerHTML = '<div class="jitsi-placeholder"><p style="color: #b93829; font-weight: 600;">Unable to start video session.</p><p style="font-size: 0.85rem; margin-top: 0.5rem;">Please try again or contact your facilitator.</p></div>';
+    container.innerHTML = `<div class="jitsi-placeholder"><p style="color: #b93829; font-weight: 600;">Unable to start video session.</p><p style="font-size: 0.85rem; margin-top: 0.5rem;">Please <a href="${config.directUrl}" target="_blank" rel="noopener" style="color: var(--accent-primary);">open the meeting directly in a new tab</a> or contact your facilitator.</p></div>`;
   }
 }
 </script>

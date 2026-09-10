@@ -18,6 +18,7 @@ The project uses Eleventy static generation published via Cloudflare Pages.
 | **Output Directory** | `_site` |
 | **Environment Variables** | `SUPABASE_URL` = `https://ehhxoanfbisdzkumsmwf.supabase.co` |
 | | `SUPABASE_ANON_KEY` = `(production anon key)` |
+| | `JAAS_APP_ID` = `(8x8 JaaS public App ID — vpaas-magic-cookie-…; default in src/_data/env.cjs)` |
 
 ### Active HTTP Headers (`src/_headers`)
 Eleventy automatically copies `src/_headers` to `_site/_headers` during build:
@@ -27,15 +28,16 @@ Eleventy automatically copies `src/_headers` to `_site/_headers` during build:
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(self "https://meet.jit.si"), microphone=(self "https://meet.jit.si"), geolocation=()
+  Permissions-Policy: camera=(self "https://meet.jit.si" "https://8x8.vc"), microphone=(self "https://meet.jit.si" "https://8x8.vc"), geolocation=()
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://meet.jit.si 'unsafe-inline'; connect-src 'self' https://*.supabase.co https://meet.jit.si wss://meet.jit.si; frame-src https://meet.jit.si; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://meet.jit.si https://8x8.vc https://*.8x8.vc 'unsafe-inline'; connect-src 'self' https://*.supabase.co https://meet.jit.si wss://meet.jit.si https://8x8.vc wss://8x8.vc https://*.8x8.vc wss://*.8x8.vc; frame-src https://meet.jit.si https://8x8.vc https://*.8x8.vc; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://8x8.vc https://*.8x8.vc; font-src 'self' data:;
 ```
 
-`meet.jit.si` is allowlisted (script-src/frame-src/connect-src) solely for the
-click-to-load Jitsi embed; `Permissions-Policy` grants camera/mic to the
-`meet.jit.si` frame only. The embed is lazy-load-only — external_api.js is not
-requested until the participant clicks "Join Video Session".
+`meet.jit.si` and `8x8.vc` are allowlisted (script-src/frame-src/connect-src) solely for the
+click-to-load Jitsi/JaaS embed; `Permissions-Policy` grants camera/mic to the
+video frames only. The embed is lazy-load-only — external_api.js is not
+requested until the participant clicks "Join Video Session". JaaS (`8x8.vc`) removes
+the 5-minute embedded demo disconnect limit.
 
 ### CSP `'unsafe-inline'` Architectural Justification
 The Content Security Policy includes `'unsafe-inline'` for `script-src` and `style-src`. This is an **intentional trade-off**:

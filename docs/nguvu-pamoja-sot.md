@@ -1,6 +1,6 @@
 # Nguvu Pamoja Online Platform — Source of Truth (SOT)
 
-**Version 1.5 — September 10, 2026**
+**Version 1.6 — September 10, 2026**
 Status: **Complete & Hardened.** Design (exemplar boards), core implementation, and security hardening finished.
 Penpot exemplar boards approved: Home, Sign in, Check-in, Week 1 (example),
 Resources, Choose space, Forum mens (example). All derivative boards
@@ -8,7 +8,8 @@ Resources, Choose space, Forum mens (example). All derivative boards
 deployed to live Supabase (`ehhxoanfbisdzkumsmwf`). Gap close-out (see
 [`gap-closeout-plan.md`](gap-closeout-plan.md)) shipped: nav uniformity, Jitsi
 production CSP/lazy-load, retention cron, keep-alive workflow, doc drift fixes.
-All 39+ test assertions passing (unit, contract, live RLS isolation, build audit, E2E browser).
+Video sessions run on 8x8 JaaS (`8x8.vc`) with a `meet.jit.si` fallback (§11).
+All tests passing (unit, contract, live RLS isolation, build audit, E2E browser).
 
 ---
 
@@ -212,11 +213,21 @@ The three-word token gate is client-side (`localStorage`) — it is a gate state
 
 Each week page includes a video session embed using the [Jitsi Meet External API](https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-external-api):
 
-- **Placeholder state**: Shows the room ID and a "Join Video Session" button. No external scripts loaded until the user clicks.
-- **On click**: Lazy-loads `https://meet.jit.si/external_api.js`, then initializes the Jitsi Meet instance inside the responsive container.
-- **Room naming**: Room IDs come from `sessions.json` (`jitsi_room_id` field). Room names are shared by all participants in a given week.
+- **Placeholder state**: Shows the room ID, a "Join Video Session" primary button, and an "Open in New Tab" direct link. No external scripts loaded until the user clicks.
+- **On click**: Lazy-loads the external API script (`https://8x8.vc/<JAAS_APP_ID>/external_api.js` when `JAAS_APP_ID` is configured, or `https://meet.jit.si/external_api.js` as fallback), then initializes the Jitsi Meet instance inside the responsive container.
+- **Room naming**: Room IDs come from `sessions.json` (`jitsi_room_id` field). When using 8x8 JaaS, rooms are prefixed with `<JAAS_APP_ID>/<jitsi_room_id>`. Room names are shared by all participants in a given week.
 
 ### Configuration
+
+The 8x8 JaaS tenant is selected by a **public App ID** (`JAAS_APP_ID`), the
+"magic cookie" format `vpaas-magic-cookie-…`, which is embedded client-side in
+the lazy-loading script loader — the same trust model as a Google Maps API key
+or the Supabase `anon` key. Basic meeting rooms on 8x8 JaaS do **not** require
+private JWT signing keys for general audio/video/chat, which preserves the
+zero-account, zero-backend architecture. `JAAS_APP_ID` is injected at build time
+via `src/_includes/base.njk` (`window.JAAS_APP_ID`) from `env.JAAS_APP_ID`
+(`src/_data/env.cjs`, defaulting to the program's tenant). If it is empty, the
+week page falls back to the public `meet.jit.si` instance.
 
 | Setting | Value | Rationale |
 |---|---|---|
@@ -235,8 +246,8 @@ operator flow, not by a statically-embedded lobby flag.
 
 ### Privacy considerations
 
-- **Public instance**: Uses `meet.jit.si`, Jitsi's free public server. Video traffic routes through Jitsi's infrastructure, not the organization's.
-- **No account required**: Participants join as guests. No Jitsi account is created or linked to the platform token.
+- **Hosted instance / JaaS**: Uses 8x8 JaaS (`8x8.vc`) or public `meet.jit.si` fallback. Video traffic routes through Jitsi infrastructure, not the organization's. JaaS removes the 5-minute embedded demo disconnect limit.
+- **No account required**: Participants join as guests without signing into 8x8 or Jitsi. No Jitsi account is created or linked to the platform token.
 - **Room privacy**: Rooms are password-protected by the facilitator flow described above. The room ID alone is not sufficient to join — participants need the facilitator-provided password.
 - **No recording**: Recording is disabled at the UI level. Participants cannot record sessions through the embed.
 - **End-to-end encryption**: Jitsi supports E2EE, but it is **not enabled** in this configuration because it requires all participants to use compatible browsers and manually exchange keys. The transport is still encrypted via DTLS-SRTP.
@@ -322,6 +333,15 @@ Anything below is a specific version, tag, or tool state that can go stale. Writ
 ---
 
 ## 18. Version and change log
+
+- **v1.6 — September 10, 2026** — 8x8 JaaS (Jitsi as a Service) video
+  integration (§11): week-page embed lazy-loads the 8x8 JaaS external API
+  (`https://8x8.vc/<JAAS_APP_ID>/external_api.js` with namespaced rooms)
+  instead of the 5-minute-limited public `meet.jit.si`, with an automatic
+  `meet.jit.si` fallback when `JAAS_APP_ID` is empty. CSP/Permissions-Policy
+  allowlist `8x8.vc`; "Open in New Tab" direct-launch link added; build audit
+  and E2E extended. Public magic-cookie model documented (no private JWT key
+  for basic rooms — zero-account, zero-backend unchanged).
 
 - **v1.5 — September 10, 2026** — Gap Close-out: nav uniformity (uniform labels,
   active-page highlight, badge slot; `/check-in/1…8` route drift corrected);

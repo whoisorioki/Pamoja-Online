@@ -33,11 +33,12 @@ Sprint 0-4 complete. Schema + RLS deployed to live Supabase
 workflow, nav uniformity, doc drift) — close-out tracked in
 [`gap-closeout-plan.md`](gap-closeout-plan.md).
 
-**2026-09-10 close-out shipped (Phases 1–4):** nav uniformity, Jitsi
+**2026-09-10 close-out + video upgrade shipped:** nav uniformity, Jitsi
 lazy-load + production CSP, retention cron migration, keep-alive workflow,
-passphrase env-ization, `test:local`, and doc reconciliation. SOT now v1.5.
-Remaining items are the operator-only ones (rotate live passphrases, deploy
-retention + workflow, ODPC gate).
+passphrase env-ization, `test:local`, doc reconciliation (SOT v1.6), and
+8x8 JaaS video (`8x8.vc`) with `meet.jit.si` fallback — removes the public
+demo 5-minute disconnect limit. Remaining items are the operator-only ones
+(rotate live passphrases, deploy retention + workflow, ODPC gate).
 
 ## Test files
 

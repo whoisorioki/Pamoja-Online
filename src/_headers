@@ -6,12 +6,12 @@
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  # Jitsi Meet embed needs camera/mic on the meet.jit.si frame only
-  Permissions-Policy: camera=(self "https://meet.jit.si"), microphone=(self "https://meet.jit.si"), geolocation=()
+  # Jitsi Meet embed needs camera/mic on meet.jit.si and 8x8.vc frames only
+  Permissions-Policy: camera=(self "https://meet.jit.si" "https://8x8.vc"), microphone=(self "https://meet.jit.si" "https://8x8.vc"), geolocation=()
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
   
   # Content Security Policy (CSP)
   # Restricts script execution to local assets and trusted Supabase CDN.
   # 'unsafe-inline' is required for template script/style tags and inline state hydration.
-  # meet.jit.si is allowlisted for the click-to-load Jitsi embed (script-src, frame-src, connect-src).
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://meet.jit.si 'unsafe-inline'; connect-src 'self' https://*.supabase.co https://meet.jit.si wss://meet.jit.si; frame-src https://meet.jit.si; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;
+  # meet.jit.si and 8x8.vc are allowlisted for the click-to-load Jitsi embed (script-src, frame-src, connect-src).
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://meet.jit.si https://8x8.vc https://*.8x8.vc 'unsafe-inline'; connect-src 'self' https://*.supabase.co https://meet.jit.si wss://meet.jit.si https://8x8.vc wss://8x8.vc https://*.8x8.vc wss://*.8x8.vc; frame-src https://meet.jit.si https://8x8.vc https://*.8x8.vc; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://8x8.vc https://*.8x8.vc; font-src 'self' data:;
