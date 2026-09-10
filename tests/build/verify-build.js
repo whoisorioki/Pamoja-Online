@@ -113,6 +113,41 @@ if (supabaseJs.includes('x-participant-token')) {
   failed = true;
 }
 
+// 5. Jitsi production-hardening checks (Gap close-out G-01 / G-02)
+console.log('\n--- 5. Jitsi Production Hardening Checks ---');
+
+const headersPath = path.resolve(siteDir, '_headers');
+const headers = fs.readFileSync(headersPath, 'utf-8');
+
+if (headers.includes('https://meet.jit.si') && headers.includes('frame-src https://meet.jit.si')) {
+  console.log('  ✅ CSP allowlists meet.jit.si (script-src/frame-src/connect-src)');
+} else {
+  console.error('  ❌ Error: CSP in _headers does not allowlist meet.jit.si');
+  failed = true;
+}
+
+if (headers.includes('camera=(self "https://meet.jit.si")')) {
+  console.log('  ✅ Permissions-Policy grants camera/mic to the meet.jit.si frame only');
+} else {
+  console.error('  ❌ Error: Permissions-Policy camera/mic not scoped to meet.jit.si');
+  failed = true;
+}
+
+// Lazy-load only: no eager <script src="https://meet.jit.si ..."> tag in any week page
+let eagerJitsiTag = false;
+for (let w = 1; w <= 8; w++) {
+  const weekHtml = fs.readFileSync(path.resolve(siteDir, `week/${w}/index.html`), 'utf-8');
+  if (weekHtml.includes('<script src="https://meet.jit.si')) {
+    console.error(`  ❌ Eager meet.jit.si script tag found in week/${w}/index.html`);
+    eagerJitsiTag = true;
+  }
+}
+if (eagerJitsiTag) {
+  failed = true;
+} else {
+  console.log('  ✅ No eager meet.jit.si script tag in any week page (lazy-load only)');
+}
+
 if (failed) {
   console.error('\n❌ Build verification FAILED!');
   process.exit(1);

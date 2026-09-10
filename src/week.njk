@@ -20,7 +20,7 @@ title: "Week {{ session.week }}: {{ session.theme }}"
 <!-- Video Join Section -->
 <div class="card">
   <h2 class="card-title">📹 Friday Video Meet</h2>
-  <p class="card-subtitle">Join our online video gathering for Week {{ session.week }}. Room lobby & password protection enabled for privacy.</p>
+  <p class="card-subtitle">Join our online video gathering for Week {{ session.week }}. Your facilitator shares the room password before the session — never share it outside the group.</p>
   
   <div id="jitsi-container" class="jitsi-container">
     <div class="jitsi-placeholder">
@@ -86,16 +86,33 @@ title: "Week {{ session.week }}: {{ session.theme }}"
   {% endif %}
 </div>
 
-<script src="https://meet.jit.si/external_api.js"></script>
 <script>
 function launchJitsiSession(roomId) {
   const container = document.getElementById('jitsi-container');
+  // Match the container's computed height so Jitsi fills the responsive space
+  const containerHeight = container.offsetHeight || 380;
   container.innerHTML = '';
+
+  // Lazy-load Jitsi script if not already loaded
+  if (typeof JitsiMeetExternalAPI === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://meet.jit.si/external_api.js';
+    script.onload = () => initJitsi(container, roomId, containerHeight);
+    script.onerror = () => {
+      container.innerHTML = '<div class="jitsi-placeholder"><p style="color: #b93829; font-weight: 600;">Unable to load video provider.</p><p style="font-size: 0.85rem; margin-top: 0.5rem;">Please disable ad-blockers for this site and try again.</p></div>';
+    };
+    document.head.appendChild(script);
+  } else {
+    initJitsi(container, roomId, containerHeight);
+  }
+}
+
+function initJitsi(container, roomId, height) {
   const domain = 'meet.jit.si';
   const options = {
     roomName: roomId,
     width: '100%',
-    height: 380,
+    height: height,
     parentNode: container,
     configOverwrite: {
       startWithAudioMuted: true,
@@ -106,6 +123,10 @@ function launchJitsiSession(roomId) {
       TOOLBAR_BUTTONS: ['microphone', 'camera', 'chat', 'raisehand', 'tileview', 'hangup']
     }
   };
-  const api = new JitsiMeetExternalAPI(domain, options);
+  try {
+    new JitsiMeetExternalAPI(domain, options);
+  } catch (e) {
+    container.innerHTML = '<div class="jitsi-placeholder"><p style="color: #b93829; font-weight: 600;">Unable to start video session.</p><p style="font-size: 0.85rem; margin-top: 0.5rem;">Please try again or contact your facilitator.</p></div>';
+  }
 }
 </script>
