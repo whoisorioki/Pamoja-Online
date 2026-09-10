@@ -1,12 +1,14 @@
 # Nguvu Pamoja Online Platform — Source of Truth (SOT)
 
-**Version 1.4 — September 5, 2026**
+**Version 1.5 — September 10, 2026**
 Status: **Complete & Hardened.** Design (exemplar boards), core implementation, and security hardening finished.
 Penpot exemplar boards approved: Home, Sign in, Check-in, Week 1 (example),
 Resources, Choose space, Forum mens (example). All derivative boards
 (Weeks 2–8, women's forum space, Journal) implemented. Schema + RLS + Flag Policy Hardening
-deployed to live Supabase (`ehhxoanfbisdzkumsmwf`). All 39 test assertions passing (unit, contract,
-live RLS isolation, build audit, E2E browser).
+deployed to live Supabase (`ehhxoanfbisdzkumsmwf`). Gap close-out (see
+[`gap-closeout-plan.md`](gap-closeout-plan.md)) shipped: nav uniformity, Jitsi
+production CSP/lazy-load, retention cron, keep-alive workflow, doc drift fixes.
+All 39+ test assertions passing (unit, contract, live RLS isolation, build audit, E2E browser).
 
 ---
 
@@ -196,7 +198,7 @@ No table anywhere maps a token back to a real identity.
 - `/` — Home, current week highlighted, link to this week's room
 - `/week/1` … `/week/8` — theme, scripture, reflection, video embed
 - `/resources` — support contacts, always visible, no gating
-- `/checkin` — native form → Supabase
+- `/check-in/1` … `/check-in/8` — weekly check-in form (paginated) → Supabase
 - `/journal` — private notes by token
 - `/forum/mens`, `/forum/womens` — passphrase-gated, nickname posts, report action. Nickname is remembered client-side and prefilled (editable per post); it never resolves to the token
 
@@ -204,13 +206,67 @@ The three-word token gate is client-side (`localStorage`) — it is a gate state
 
 ---
 
-## 11. Build plan (summary — see companion implementation plan for the sprint-by-sprint sequence)
+## 11. Video Session Integration (Jitsi Meet)
 
-Single consolidated build delivered in sprints (see companion implementation plan): ODPC check starts in Sprint 0 in parallel; schema + RLS built and tested before any frontend wiring; content, video, check-in, journal, and forum ship together rather than in separate phases. A prior two-phase (Google Form first) approach was designed in detail and superseded — see Section 15.
+### How it works
+
+Each week page includes a video session embed using the [Jitsi Meet External API](https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-external-api):
+
+- **Placeholder state**: Shows the room ID and a "Join Video Session" button. No external scripts loaded until the user clicks.
+- **On click**: Lazy-loads `https://meet.jit.si/external_api.js`, then initializes the Jitsi Meet instance inside the responsive container.
+- **Room naming**: Room IDs come from `sessions.json` (`jitsi_room_id` field). Room names are shared by all participants in a given week.
+
+### Configuration
+
+| Setting | Value | Rationale |
+|---|---|---|
+| `startWithAudioMuted` | `true` | Reduces background noise in group sessions |
+| `startWithVideoMuted` | `false` | Participants are present visually unless they choose to disable |
+| `disableThirdPartyRequests` | `true` | Prevents Jitsi from leaking participant data to third-party CDNs |
+| Toolbar buttons | `microphone`, `camera`, `chat`, `raisehand`, `tileview`, `hangup` | Minimal set — no recording, no screen sharing, no invites |
+
+Room privacy: rooms are protected by a **facilitator-set password** (friends of
+the program). Password distribution is entirely out-of-band — the room ID is
+printed on the page; the password is never embedded in the site. Jitsi's
+lobby setting is not configured server-side, so a room becomes private when
+the facilitator joins first and locks it with the password (the documented
+facilitator flow). "Room lobby & password protection" is delivered by this
+operator flow, not by a statically-embedded lobby flag.
+
+### Privacy considerations
+
+- **Public instance**: Uses `meet.jit.si`, Jitsi's free public server. Video traffic routes through Jitsi's infrastructure, not the organization's.
+- **No account required**: Participants join as guests. No Jitsi account is created or linked to the platform token.
+- **Room privacy**: Rooms are password-protected by the facilitator flow described above. The room ID alone is not sufficient to join — participants need the facilitator-provided password.
+- **No recording**: Recording is disabled at the UI level. Participants cannot record sessions through the embed.
+- **End-to-end encryption**: Jitsi supports E2EE, but it is **not enabled** in this configuration because it requires all participants to use compatible browsers and manually exchange keys. The transport is still encrypted via DTLS-SRTP.
+
+### Responsive behavior
+
+The Jitsi container height scales with the viewport:
+
+| Viewport | Container height |
+|---|---|
+| < 640px (mobile) | 380px |
+| 640px+ (tablet) | 480px |
+| 768px+ (tablet landscape) | 540px |
+| 1024px+ (desktop) | 600px |
+
+The Jitsi API receives the container's computed height at initialization time, so the video fills the available space without letterboxing.
+
+### Error handling
+
+If the Jitsi script fails to load (ad-blocker, network issue, CDN outage), the placeholder is replaced with a plain-language error message suggesting the user check their connection or contact their facilitator for a direct room link.
 
 ---
 
-## 12. Testing plan
+## 12. Build plan (summary — see companion implementation plan for the sprint-by-sprint sequence)
+
+Single consolidated build delivered in sprints (see companion implementation plan): ODPC check starts in Sprint 0 in parallel; schema + RLS built and tested before any frontend wiring; content, video, check-in, journal, and forum ship together rather than in separate phases. A prior two-phase (Google Form first) approach was designed in detail and superseded — see Section 16.
+
+---
+
+## 13. Testing plan
 
 - RLS cross-token / cross-space access attempts (privacy depends entirely on this)
 - Forum passphrase gate actually blocks unauthorized read/write
@@ -221,7 +277,7 @@ Single consolidated build delivered in sprints (see companion implementation pla
 
 ---
 
-## 13. Deployment (development → production)
+## 14. Deployment (development → production)
 
 **Development:** Penpot for design (team PAMOJA), local Pop!_OS environment, Eleventy dev server, Supabase project in development mode for schema/RLS testing before real data ever touches it.
 
@@ -229,7 +285,7 @@ Single consolidated build delivered in sprints (see companion implementation pla
 
 ---
 
-## 14. Maintenance
+## 15. Maintenance
 
 - Curriculum changes: edit the one data file, redeploy
 - Periodic review of who holds Supabase admin access and who distributes forum passphrases
@@ -238,7 +294,7 @@ Single consolidated build delivered in sprints (see companion implementation pla
 
 ---
 
-## 15. Decision log
+## 16. Decision log
 
 - **Public forum:** considered, rejected — conflicts with Confidentiality and Gender-separation values, raises legal risk from processing to publishing sensitive data.
 - **Google Form + Sheet as a temporary check-in store:** designed in detail (token passed via pre-filled URL into a hidden Form field, submissions landing in a facilitator-readable Sheet). Superseded by a single consolidated Supabase-backed build — the switching cost of a throwaway integration was smaller than the read-back limitations (no journal history, no forum) a Sheet-based store can't support regardless of phasing.
@@ -251,12 +307,12 @@ Single consolidated build delivered in sprints (see companion implementation pla
 
 ---
 
-## 16. Subject to change — re-verify before trusting
+## 17. Subject to change — re-verify before trusting
 
 Anything below is a specific version, tag, or tool state that can go stale. Written down here for traceability, not as a guarantee it's still accurate:
 
 - Penpot platform version (2.13 as of research; check `design.penpot.app` for current)
-- Labyrinth UI Free kit version (v1.3) — **superseded**; kit import dropped (see §15)
+- Labyrinth UI Free kit version (v1.3) — **superseded**; kit import dropped (see §16)
 - Cline (VS Code) model in use: **DeepSeek** (tag as configured in the Cline extension; re-check the current default). Local Ollama / `qwen2.5-coder:3b` retired — no longer used
 - Cline extension version and its MCP configuration format
 - `penpot-mcp` package (PyPI `penpot-mcp`) — installation and auth method
@@ -265,7 +321,15 @@ Anything below is a specific version, tag, or tool state that can go stale. Writ
 
 ---
 
-## 17. Version and change log
+## 18. Version and change log
+
+- **v1.5 — September 10, 2026** — Gap Close-out: nav uniformity (uniform labels,
+  active-page highlight, badge slot; `/check-in/1…8` route drift corrected);
+  Jitsi production hardening (lazy-load-only embed, CSP + Permissions-Policy
+  allowlist for `meet.jit.si`, facilitator-password copy reconciled with §11);
+  90-day `pg_cron` retention migration for `check_ins`/`journal_entries`;
+  GitHub Actions keep-alive workflow; live RLS tests env-driven passphrases;
+  `test:local` for offline runs. See [`gap-closeout-plan.md`](gap-closeout-plan.md).
 
 - **v1.4 — September 5, 2026** — Security Hardening & Audit Completion: Deployed `20260905000000_harden_flag_policy.sql` to live Supabase (`ehhxoanfbisdzkumsmwf`) enforcing column-level immutability during post flagging. Reconciled token pool sampling math (704,880 combinations). Integrated Supabase CLI (`config.toml`, `seed.sql`), live PostgreSQL RLS isolation test suite (`tests/integration/rls-live.test.js`), and Cloudflare Pages custom security headers (`src/_headers`). All 39 test assertions passing across unit, contract, live integration, build audit, and Playwright E2E suites.
 

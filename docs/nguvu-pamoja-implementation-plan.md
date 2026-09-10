@@ -172,7 +172,7 @@ No table anywhere maps a token back to a real identity — that mapping simply d
 - `/` — Home, current week highlighted, link to this week's video room
 - `/week/1` … `/week/8` — theme, scripture, reflection question, video embed
 - `/resources` — support contacts, always visible, no gating
-- `/checkin` — native form, calls Supabase directly
+- `/check-in/1` … `/check-in/8` — weekly check-in form (paginated), writes straight to Supabase
 - `/journal` — private notes by token
 - `/forum/mens`, `/forum/womens` — passphrase-gated, post/reply under a chosen nickname (remembered client-side, prefilled, editable; never the token), report action on each post
 
@@ -353,8 +353,8 @@ Cloudflare runs `npm run build`, which executes `npx @11ty/eleventy`, producing 
 - [ ] Decide forum moderation posture long-term: report/flag (current) vs. a pre-moderation queue
 - [ ] Confirm the public-forum rejection with the Fountwood facilitator team
 - [ ] Confirm who the 1–2 trusted Supabase admins will be, and who distributes/rotates forum passphrases
-- [ ] Set up static hosting on Cloudflare Pages and inject build env vars — steps defined in Section 12 and [`production-operational-playbook.md`](production-operational-playbook.md)
-- [ ] Decide whether to set up a keep-alive cron for the Supabase free tier
+- [x] Set up static hosting on Cloudflare Pages and inject build env vars — steps defined in Section 12 and [`production-operational-playbook.md`](production-operational-playbook.md)
+- [x] Set up the GitHub Actions keep-alive cron (`.github/workflows/keep-alive.yml`, G-06)
 - [x] **Decided (Sprint 0):** Week detail screen reflection persistence uses `journal_entries` (`token` + `week` + `entry`), matching the SOT §8 schema without requiring new tables.
 - [x] **Completed (Sprint 0):** Schema + RLS migration deployed to live Supabase (`ehhxoanfbisdzkumsmwf`). Tables: `check_ins`, `journal_entries`, `forum_posts`, `forum_passphrases`. RLS policies verified via live integration tests.
 - [x] **Completed (Sprint 1):** Extended `src/_data/sessions.json` with `look_back`, `look_into_question`, `look_up_questions`, `prayer`, `jitsi_room_id` for all 8 weeks. Token flow, check-in, journal, and week templates implemented.

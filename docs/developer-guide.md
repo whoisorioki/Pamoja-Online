@@ -143,6 +143,12 @@ npm install
 # Start Eleventy development server (http://localhost:8080)
 npm start
 
-# Run full automated test suite (Vitest + Build Audit + Playwright E2E)
+# Run full automated test suite (Vitest + Build Audit + Playwright E2E).
+# Requires a configured .env (SUPABASE_URL / SUPABASE_ANON_KEY and current
+# MENS_SPACE_PASSPHRASE / WOMENS_SPACE_PASSPHRASE for the live RLS tests).
 npm test
+
+# Run the offline test suite: unit + contract only (no .env / no live DB).
+# Use this for fast local checks without a configured environment.
+npm run test:local
 ```

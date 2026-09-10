@@ -27,10 +27,15 @@ Eleventy automatically copies `src/_headers` to `_site/_headers` during build:
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Permissions-Policy: camera=(self "https://meet.jit.si"), microphone=(self "https://meet.jit.si"), geolocation=()
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; connect-src 'self' https://*.supabase.co; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://meet.jit.si 'unsafe-inline'; connect-src 'self' https://*.supabase.co https://meet.jit.si wss://meet.jit.si; frame-src https://meet.jit.si; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;
 ```
+
+`meet.jit.si` is allowlisted (script-src/frame-src/connect-src) solely for the
+click-to-load Jitsi embed; `Permissions-Policy` grants camera/mic to the
+`meet.jit.si` frame only. The embed is lazy-load-only — external_api.js is not
+requested until the participant clicks "Join Video Session".
 
 ### CSP `'unsafe-inline'` Architectural Justification
 The Content Security Policy includes `'unsafe-inline'` for `script-src` and `style-src`. This is an **intentional trade-off**:
@@ -79,6 +84,12 @@ Because `is_valid_space_passphrase()` is called internally by PostgreSQL RLS pol
 
 Space passphrases (`mens` and `womens`) gate access to group discussions. Passphrases must be rotated at the start of each new 8-week cohort cycle.
 
+> **Never commit passphrases.** The dev/test seed values in
+> `supabase/migrations/20260904000000_schema_and_rls.sql` and `supabase/seed.sql`
+> are placeholders only. The live RLS tests read the current cohort passphrases
+> from the environment (`MENS_SPACE_PASSPHRASE` / `WOMENS_SPACE_PASSPHRASE`),
+> with an insecure dev-seed fallback for local `supabase start` runs only.
+
 ### Execution Procedure
 
 1. Log into **Supabase Dashboard** → **SQL Editor** (or run via `supabase` CLI linked to production).
@@ -94,6 +105,26 @@ Space passphrases (`mens` and `womens`) gate access to group discussions. Passph
    WHERE space = 'womens';
    ```
 3. Distribute the new passphrases to facilitators via secure out-of-band communication.
+4. Update the deployment environment variables `MENS_SPACE_PASSPHRASE` /
+   `WOMENS_SPACE_PASSPHRASE` so the live RLS test suite exercises the same
+   cohort passphrases, then run `npm test`.
+
+---
+
+## 3b. Retention & Keep-Alive Verification
+
+- **Retention (90 days, SOT §9 / G-05):** after deploying
+  `supabase/migrations/20260912000000_add_retention_cron.sql`, confirm both jobs
+  exist:
+  ```sql
+  select jobid, jobname, schedule, command from cron.job order by jobid;
+  ```
+  Expect `nguvu-purge-check-ins` and `nguvu-purge-journal-entries`, each running
+  daily at 03:00 UTC and deleting rows older than 90 days.
+- **Keep-alive (SOT §6.1 / G-06):** `.github/workflows/keep-alive.yml` pings
+  `https://<ref>.supabase.co/auth/v1/health` every Mon/Thu 06:00 UTC (manual
+  `workflow_dispatch` also available). Confirm it ran green at least once after
+  each deployment.
 
 ---
 

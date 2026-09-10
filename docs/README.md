@@ -14,6 +14,7 @@ tool version that will go stale?**
 | [developer-guide.md](developer-guide.md) | Technical subsystem explanations, codebase navigation, developer extensibility guides | Core architecture decisions or sprint history |
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | Community contribution rules, PR workflow, code of conduct | Internal subsystem technical walkthroughs |
 | [../AGENTS.md](../AGENTS.md) | Operational guidelines for AI coding agents | Architecture authority (links to SOT) |
+| [gap-closeout-plan.md](gap-closeout-plan.md) | Post-audit gap registry + close-out sequencing (2026-09-10) | Architecture (SOT) or build sequence (implementation plan) |
 
 If a fact is asserted in more than one place and they disagree, that is
 a bug: the SOT wins for architecture; the implementation plan wins for
@@ -27,6 +28,16 @@ Stale-prone tool versions belong only in SOT Section 16.
 
 Sprint 0-4 complete. Schema + RLS deployed to live Supabase
 (`ehhxoanfbisdzkumsmwf`). All 39 test assertions passing.
+
+2026-09-10 audit found gaps (Jitsi production CSP, retention cron, keep-alive
+workflow, nav uniformity, doc drift) — close-out tracked in
+[`gap-closeout-plan.md`](gap-closeout-plan.md).
+
+**2026-09-10 close-out shipped (Phases 1–4):** nav uniformity, Jitsi
+lazy-load + production CSP, retention cron migration, keep-alive workflow,
+passphrase env-ization, `test:local`, and doc reconciliation. SOT now v1.5.
+Remaining items are the operator-only ones (rotate live passphrases, deploy
+retention + workflow, ODPC gate).
 
 ## Test files
 
