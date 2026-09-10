@@ -88,6 +88,21 @@ header.site-header {
   color: var(--text-primary);
 }
 
+.nav-link.active {
+  font-weight: 600;
+}
+
+/* Nav token badge — optically aligned with the nav links, never shifted by the badge pill margins */
+#user-token-badge.token-badge {
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+}
+
+#user-token-badge.token-badge .badge {
+  margin-bottom: 0;
+}
+
 /* Card System */
 .card {
   background: var(--bg-card);

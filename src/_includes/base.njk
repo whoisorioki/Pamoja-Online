@@ -24,13 +24,18 @@
       <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
         <span class="nav-toggle-icon">☰</span>
       </button>
-      <nav class="site-nav" id="site-nav">
-        <a href="/" class="nav-link">Home</a>
-        <a href="/check-in/1/" class="nav-link">Check-in</a>
-        <a href="/journal/" class="nav-link">Journal</a>
-        <a href="/forum/mens/" class="nav-link">Forum</a>
-        <a href="/resources/" class="nav-link">Support</a>
-        <div id="user-token-badge"></div>
+      {% set navItems = [
+        { label: 'Home', href: '/', active: page.url == '/' },
+        { label: 'Check In', href: '/check-in/1/', active: page.url | startsWith('/check-in/') },
+        { label: 'Journal', href: '/journal/', active: page.url | startsWith('/journal/') },
+        { label: 'Forum', href: '/forum/mens/', active: page.url | startsWith('/forum/') },
+        { label: 'Support', href: '/resources/', active: page.url | startsWith('/resources/') }
+      ] %}
+      <nav class="site-nav" id="site-nav" aria-label="Primary">
+        {% for item in navItems %}
+          <a href="{{ item.href }}" class="nav-link{% if item.active %} active{% endif %}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>
+        {% endfor %}
+        <div id="user-token-badge" class="token-badge"></div>
       </nav>
     </header>
 
