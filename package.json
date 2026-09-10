@@ -8,6 +8,7 @@
     "start": "eleventy --serve",
     "build": "eleventy",
     "test": "vitest run && npx @11ty/eleventy && node tests/build/verify-build.js && playwright test",
+    "test:local": "vitest run tests/unit tests/contract",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset",

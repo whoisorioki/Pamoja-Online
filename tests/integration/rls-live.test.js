@@ -8,8 +8,11 @@ dotenv.config({ path: path.join(process.cwd(), '.env') });
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
-const MENS_PASSPHRASE = 'brotherhood2026';
-const WOMENS_PASSPHRASE = 'sisterhood2026';
+// Passphrases for live RLS tests. In production these are read from the
+// environment (current rotated cohort passphrases). A local dev fallback is
+// provided for `supabase start`/`supabase db reset` seed values (G-07).
+const MENS_PASSPHRASE = process.env.MENS_SPACE_PASSPHRASE || 'brotherhood2026';
+const WOMENS_PASSPHRASE = process.env.WOMENS_SPACE_PASSPHRASE || 'sisterhood2026';
 
 function createClientForParticipant(token, passphrase, spaceName) {
   const headers = {};

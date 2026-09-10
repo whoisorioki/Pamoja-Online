@@ -56,4 +56,16 @@ describe('Schema Contract Verification', () => {
     expect(schemaSql).toContain('forum_posts_update_flag');
     expect(schemaSql).toContain('forum_posts_delete_author');
   });
+
+  it('defines the 90-day retention cron jobs for check_ins and journal_entries (SOT §9, G-05)', () => {
+    const retentionPath = path.resolve(__dirname, '../../supabase/migrations/20260912000000_add_retention_cron.sql');
+    expect(fs.existsSync(retentionPath)).toBe(true);
+    const retentionSql = fs.readFileSync(retentionPath, 'utf-8');
+    expect(retentionSql).toContain('create extension if not exists pg_cron');
+    expect(retentionSql).toContain("'nguvu-purge-check-ins'");
+    expect(retentionSql).toContain('from public.check_ins');
+    expect(retentionSql).toContain("'nguvu-purge-journal-entries'");
+    expect(retentionSql).toContain('from public.journal_entries');
+    expect(retentionSql).toContain("interval '90 days'");
+  });
 });

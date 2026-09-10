@@ -1,0 +1,27 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Mondays & Thursdays 06:00 UTC — pings the project so the free tier
+    # never hits the 7-day idle pause (SOT §6.1, gap close-out G-06).
+    - cron: '0 6 * * 1,4'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping Supabase health endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping {SUPABASE_REF}.supabase.co/auth/v1/health
+        env:
+          SUPABASE_REF: ${{ vars.SUPABASE_REF }}
+        run: |
+          REF="${SUPABASE_REF:-ehhxoanfbisdzkumsmwf}"
+          for i in 1 2 3; do
+            status=$(curl -sS -o /dev/null -w '%{http_code}' "https://${REF}.supabase.co/auth/v1/health") || true
+            echo "attempt ${i} -> HTTP ${status}"
+            if [ "$status" = "200" ]; then exit 0; fi
+            sleep 5
+          done
+          echo "Supabase project ${REF} did not respond with HTTP 200 after 3 attempts"
+          exit 1
