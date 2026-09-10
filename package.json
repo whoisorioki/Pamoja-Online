@@ -7,7 +7,7 @@
   "scripts": {
     "start": "eleventy --serve",
     "build": "eleventy",
-    "test": "vitest run && npx @11ty/eleventy && node tests/build/verify-build.js && playwright test",
+    "test": "NODE_OPTIONS=\"--dns-result-order=ipv4first\" vitest run && npx @11ty/eleventy && node tests/build/verify-build.js && playwright test",
     "test:local": "vitest run tests/unit tests/contract",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",

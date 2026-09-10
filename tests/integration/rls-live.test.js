@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -35,7 +35,7 @@ function createClientForParticipant(token, passphrase, spaceName) {
   });
 }
 
-describe('Live RLS Isolation Tests — Nguvu Pamoja', () => {
+describe('Live RLS Isolation Tests — Nguvu Pamoja', { timeout: 20000, hookTimeout: 20000 }, () => {
   beforeAll(() => {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       throw new Error('SUPABASE_URL and SUPABASE_ANON_KEY must be set in .env');
@@ -196,4 +196,23 @@ describe('Live RLS Isolation Tests — Nguvu Pamoja', () => {
 
     expect(wrongRead.length).toBe(0);
   });
+
+  afterAll(async () => {
+    const tokenA = 'alpha-bravo-charlie';
+    const tokenB = 'delta-echo-foxtrot';
+
+    const clientA = createClientForParticipant(tokenA, MENS_PASSPHRASE, 'mens');
+    const clientB = createClientForParticipant(tokenB, WOMENS_PASSPHRASE, 'womens');
+
+    try {
+      await clientA.from('check_ins').delete().eq('token', tokenA);
+      await clientB.from('check_ins').delete().eq('token', tokenB);
+      await clientA.from('journal_entries').delete().eq('token', tokenA);
+      await clientB.from('journal_entries').delete().eq('token', tokenB);
+      await clientA.from('forum_posts').delete().eq('token', tokenA);
+      await clientB.from('forum_posts').delete().eq('token', tokenB);
+    } catch {
+      // Best-effort test cleanup
+    }
+  }, 30000);
 });
