@@ -2,7 +2,7 @@
 
 **Document Purpose:** Production deployment setup, HTTP security headers, WAF rate limiting, CORS configuration, CSP justification, and facilitator passphrase rotation procedures.  
 **Target Environment:** Cloudflare Pages + Supabase Cloud  
-**Authority Reference:** SOT v1.4 (§7, §8, §9)
+**Authority Reference:** SOT v1.6 (§7, §8, §9, §11)
 
 ---
 
@@ -138,9 +138,9 @@ Run the automated verification suite locally prior to deployment:
 npm test
 ```
 
-### Verified Test Suite Breakdown (29 Vitest + 1 Build Audit + 10 E2E)
+### Verified Test Suite Breakdown (27 Vitest unit/contract + 3 live RLS + 1 Build Audit + 20 E2E)
 - [x] **Unit Tests (19)**: Token generation (7), `escapeHtml` sanitization (8), Supabase client initialization (4).
-- [x] **Schema Contract Tests (7)**: SQL table definitions and RLS policy names.
+- [x] **Schema Contract Tests (8)**: SQL table definitions, RLS policy names, retention cron migration.
 - [x] **Live Database RLS Tests (3)**: Cross-token check-in isolation, cross-token journal isolation, cross-space forum isolation against Supabase (`ehhxoanfbisdzkumsmwf`).
-- [x] **Build Output Verification (1)**: `_site/_headers` presence, environment variable injection, zero `service_role` leaks.
-- [x] **Playwright E2E Browser Tests (10)**: Token generation, two-stage passphrase gating, DOM XSS sanitization, and clean page renders across all 10 site routes.
+- [x] **Build Output Verification (1)**: `_site/_headers` presence, env injection (Supabase + `JAAS_APP_ID`), zero `service_role` leaks, Jitsi/JaaS lazy-load + CSP allowlist.
+- [x] **Playwright E2E Browser Tests (20)**: Token flow, two-stage passphrase gating, DOM XSS sanitization, nav uniformity, 8x8 JaaS lazy-load, clean page renders across all routes.

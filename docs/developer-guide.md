@@ -28,7 +28,7 @@ Nguvu Pamoja Online is a **jamstack web application** designed for zero operatio
 ### Core Technologies
 - **Static Site Generator**: [Eleventy 3.x (`@11ty/eleventy`)](https://www.11ty.dev/) compiling Nunjucks templates in `src/` to `_site/`.
 - **Backend-as-a-Service (BaaS)**: [Supabase](https://supabase.com/) (PostgreSQL + PostgREST + Row Level Security).
-- **Video Meeting**: Jitsi Meet External API (`external_api.js`).
+- **Video Meeting**: 8x8 JaaS (Jitsi as a Service) External API (`external_api.js` on `8x8.vc`), `meet.jit.si` fallback.
 - **Test Framework**: Vitest (unit/contract/integration) + Playwright (headless E2E browser tests).
 - **Styling**: Vanilla CSS (`src/assets/css/style.css`) with curated design tokens.
 
@@ -43,7 +43,7 @@ Nguvu Pamoja Online is a **jamstack web application** designed for zero operatio
 ├── vitest.config.js         # Vitest test framework configuration
 ├── src/                     # Source directory for Eleventy
 │   ├── _data/               # Dynamic data files
-│   │   ├── env.js           # Injects SUPABASE_URL & SUPABASE_ANON_KEY into templates
+│   │   ├── env.cjs           # Injects SUPABASE_URL, SUPABASE_ANON_KEY & JAAS_APP_ID into templates
 │   │   ├── sessions.json    # Single Source of Truth for 8-week curriculum
 │   │   └── spaces.json      # Configuration for Men's and Women's forum spaces
 │   ├── _includes/           # Reusable layouts and partials

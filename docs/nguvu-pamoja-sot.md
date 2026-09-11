@@ -1,6 +1,6 @@
 # Nguvu Pamoja Online Platform — Source of Truth (SOT)
 
-**Version 1.6 — September 10, 2026**
+**Version 1.7 — September 10, 2026**
 Status: **Complete & Hardened.** Design (exemplar boards), core implementation, and security hardening finished.
 Penpot exemplar boards approved: Home, Sign in, Check-in, Week 1 (example),
 Resources, Choose space, Forum mens (example). All derivative boards
@@ -49,12 +49,12 @@ The group's own Participant Guide sets out Core Values and Group Guidelines that
 
 | Feature | Status |
 |---|---|
-| Weekly session page — theme, scripture, reflection question | Scaffolded in Eleventy from `src/_data/sessions.json`; Penpot boards: Home + Week 1 example (look-back / look-into / look-up rhythm) |
-| Video room join, embedded (Jitsi) | Planned — not in templates yet |
-| Check-in (challenge / victory) | Designed — Penpot Check-in board, fields match §8 `check_ins` |
-| Resources & crisis contacts, always visible, ungated | Scaffolded — `src/resources.njk`, no gating; Penpot Resources board added |
-| Private journal, tied to a pseudonym token | Planned — persistence = §8 `journal_entries`; form board follows the Check-in exemplar pattern; sequenced in an implementation sprint |
-| Private, gender-separated forum | Designed — men's forum exemplar (post/reply under a nickname, report action, remembered client-side); women's space replicates the exemplar during implementation |
+| Weekly session page — theme, scripture, reflection question | **Shipped** — generated from `src/_data/sessions.json` (one template, 8 pages) |
+| Video room join, embedded (8x8 JaaS / Jitsi) | **Shipped** — click-to-load embed in `src/week.njk` (§11): `8x8.vc` JaaS with `meet.jit.si` fallback |
+| Check-in (challenge / victory) | **Shipped** — `/check-in/1…8` (paginated), writes to §8 `check_ins` via RLS |
+| Resources & crisis contacts, always visible, ungated | **Shipped** — `src/resources.njk`, no gating |
+| Private journal, tied to a pseudonym token | **Shipped** — `/journal`, §8 `journal_entries`, owner-only RLS |
+| Private, gender-separated forum | **Shipped** — `/forum/mens` + `/forum/womens`, passphrase-gated, post/reply + report under a nickname |
 
 Explicitly and permanently out of scope: real-identity accounts, payments, a public forum, a custom moderation dashboard for v1 (flagged posts reviewed directly in Supabase console instead).
 
@@ -66,10 +66,10 @@ Explicitly and permanently out of scope: real-identity accounts, payments, a pub
 |---|---|
 | 1. Requirements & Planning | Complete |
 | 2. Design | **Complete (exemplars)** — system architecture, data model, and page map complete; UI/UX framework defined (Section 5); Penpot exemplar boards approved: Home, Sign in (token gate), Check-in, Week 1 (example), Resources, Choose space, men's forum space (example). Derivative work (Journal board, women's forum space, Weeks 2–8) is sequenced in the implementation plan's sprints, replicating approved exemplars |
-| 3. Implementation | In progress — Eleventy scaffold, 8 week pages, resources; no Jitsi, Supabase, check-in, journal, or forum yet |
-| 4. Testing | Defined, not yet executed |
-| 5. Deployment | Defined, not yet executed |
-| 6. Maintenance | Defined, not yet applicable |
+| 3. Implementation | **Complete** — week pages, resources, check-in, journal, forum, 8x8 JaaS video, and Supabase client + RLS all shipped |
+| 4. Testing | **Complete** — 27 unit/contract + 3 live RLS + build audit + 20 Playwright E2E passing locally |
+| 5. Deployment | In progress — Supabase schema/RLS live (`ehhxoanfbisdzkumsmwf`); Cloudflare Pages steps in plan §12 and the playbook |
+| 6. Maintenance | Defined (see §15) |
 
 ---
 
@@ -333,6 +333,13 @@ Anything below is a specific version, tag, or tool state that can go stale. Writ
 ---
 
 ## 18. Version and change log
+
+- **v1.7 — September 10, 2026** — Documentation expansion: added
+  [`user-guide.md`](user-guide.md) (participant-facing usage guide) and
+  [`fountwood-leaders-briefing.md`](fountwood-leaders-briefing.md) (church
+  leader briefing — scale & compliance); reconciled stale scope/SDLC rows
+  (§3, §4) with the shipped platform; playbook test counts and developer-guide
+  `env.cjs` reference corrected; both docs registered in the hub.
 
 - **v1.6 — September 10, 2026** — 8x8 JaaS (Jitsi as a Service) video
   integration (§11): week-page embed lazy-loads the 8x8 JaaS external API

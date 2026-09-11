@@ -198,7 +198,7 @@ Sequenced so RLS is verified before it carries real traffic, and ODPC review run
 ### Sprint 2 — Check-in + Journal [COMPLETED]
 - **[COMPLETED]** Created week-scoped Check-in pages (`/check-in/1/` … `/check-in/8/`) wired to `check_ins` table via Supabase JS client (`src/check-in.njk`)
 - **[COMPLETED]** Created private Reflection & Journal space (`/journal/`) wired to `journal_entries` table with full CRUD (create, read reverse-chrono, edit, delete own entries — `src/journal.njk`)
-- **[COMPLETED]** Integrated Supabase client module (`src/assets/js/supabase.js`) using `SUPABASE_URL` and `SUPABASE_ANON_KEY` build-time environment variables (`src/_data/env.js`)
+- **[COMPLETED]** Integrated Supabase client module (`src/assets/js/supabase.js`) using `SUPABASE_URL` and `SUPABASE_ANON_KEY` build-time environment variables (`src/_data/env.cjs`)
 - **[COMPLETED]** Added token gate validation and informative feedback messages across Check-in and Journal interfaces
 
 ### Sprint 3 — Forum (men's + women's) [COMPLETED]
@@ -323,7 +323,7 @@ Cloudflare runs `npm run build`, which executes `npx @11ty/eleventy`, producing 
 
 ### Deployment Verification Checklist
 
-- [ ] All 39 test scenarios passing (`npm test`)
+- [ ] All test scenarios passing (`npm test` with a configured `.env`)
 - [ ] `_site/_headers` present in build output
 - [ ] Zero `service_role` occurrences in `_site/`
 - [ ] Cloudflare Pages env vars configured

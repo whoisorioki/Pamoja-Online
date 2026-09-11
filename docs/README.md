@@ -15,6 +15,8 @@ tool version that will go stale?**
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | Community contribution rules, PR workflow, code of conduct | Internal subsystem technical walkthroughs |
 | [../AGENTS.md](../AGENTS.md) | Operational guidelines for AI coding agents | Architecture authority (links to SOT) |
 | [gap-closeout-plan.md](gap-closeout-plan.md) | Post-audit gap registry + close-out sequencing (2026-09-10) | Architecture (SOT) or build sequence (implementation plan) |
+| [user-guide.md](user-guide.md) | Participant-facing usage guide (token, check-in, journal, forum, video, privacy FAQ) | Architecture, sprint order, or operator internals |
+| [fountwood-leaders-briefing.md](fountwood-leaders-briefing.md) | Community-leader presentation & briefing — scale and compliance (Kenya DPA / ODPC) | Sprint task order or technical walkthroughs |
 
 If a fact is asserted in more than one place and they disagree, that is
 a bug: the SOT wins for architecture; the implementation plan wins for
@@ -27,7 +29,8 @@ Stale-prone tool versions belong only in SOT Section 16.
 ## Status
 
 Sprint 0-4 complete. Schema + RLS deployed to live Supabase
-(`ehhxoanfbisdzkumsmwf`). All 39 test assertions passing.
+(`ehhxoanfbisdzkumsmwf`). Test suite: 27 unit/contract + 3 live RLS +
+1 build audit + 20 browser E2E.
 
 2026-09-10 audit found gaps (Jitsi production CSP, retention cron, keep-alive
 workflow, nav uniformity, doc drift) — close-out tracked in
@@ -35,10 +38,14 @@ workflow, nav uniformity, doc drift) — close-out tracked in
 
 **2026-09-10 close-out + video upgrade shipped:** nav uniformity, Jitsi
 lazy-load + production CSP, retention cron migration, keep-alive workflow,
-passphrase env-ization, `test:local`, doc reconciliation (SOT v1.6), and
+passphrase env-ization, `test:local`, doc reconciliation (SOT v1.7), and
 8x8 JaaS video (`8x8.vc`) with `meet.jit.si` fallback — removes the public
 demo 5-minute disconnect limit. Remaining items are the operator-only ones
 (rotate live passphrases, deploy retention + workflow, ODPC gate).
+
+**Participant & leader docs added:** [`user-guide.md`](user-guide.md)
+(plain-language usage guide) and [`fountwood-leaders-briefing.md`](fountwood-leaders-briefing.md)
+(scale & compliance briefing for church leadership).
 
 ## Test files
 
